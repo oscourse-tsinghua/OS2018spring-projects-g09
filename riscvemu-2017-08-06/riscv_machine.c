@@ -620,7 +620,7 @@ static int riscv_build_fdt(RISCVMachine *m, uint8_t *dst, const char *cmd_line)
     *q = '\0';
     fdt_prop_str(s, "riscv,isa", isa_string);
     
-    fdt_prop_str(s, "mmu-type", max_xlen <= 32 ? "sv32" : "sv48");
+    fdt_prop_str(s, "mmu-type", max_xlen <= 32 ? "riscv,sv32" : "riscv,sv48");
     fdt_prop_u32(s, "clock-frequency", 2000000000);
 
     fdt_begin_node(s, "interrupt-controller");
@@ -713,10 +713,15 @@ static int riscv_build_fdt(RISCVMachine *m, uint8_t *dst, const char *cmd_line)
 
     fdt_end_node(s); /* chosen */
     
+    fdt_begin_node(s, "htif");
+	fdt_prop_str(s, "compatible", "ucb,htif0");
+
+	fdt_end_node(s); /* htif */
+
     fdt_end_node(s); /* / */
 
     size = fdt_output(s, dst);
-#if 0
+#if 1
     {
         FILE *f;
         f = fopen("/tmp/riscvemu.dtb", "wb");

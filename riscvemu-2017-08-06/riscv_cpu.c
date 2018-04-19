@@ -1486,6 +1486,29 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
     uint64_t timeout;
 
     timeout = s->insn_counter + n_cycles;
+
+    // FIXME
+	fprintf(stderr, "s->insn_counter = %lld\n", s->insn_counter);
+	if (s->power_down_flag) {
+		fprintf(stderr, "riscvemu exit because of power down\n");
+		exit(1);
+	}
+
+	static uint64_t last_counter = 0, count = 0;
+	if (s->insn_counter == last_counter) count ++;
+	else {
+		last_counter = s->insn_counter;
+		count = 1;
+	}
+	if (count > 10) {
+		fprintf(stderr, "riscvemu exit because of s->insn_counter always same\n");
+		exit(1);
+	}
+	if (s->insn_counter > 100000) {
+		fprintf(stderr, "riscvemu exit because of s->insn_counter = %d\n", s->insn_counter);
+		exit(1);
+	}
+
     while (!s->power_down_flag &&
            (int)(timeout - s->insn_counter) > 0) {
         n_cycles = timeout - s->insn_counter;
