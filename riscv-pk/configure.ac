@@ -88,8 +88,8 @@ AC_ARG_ENABLE([32bit],
 case "${BUILD_32BIT}" in
   yes|default)
 	echo "Building 32-bit pk"
-	CFLAGS="$default_CFLAGS -m32"
-	LDFLAGS="-m32"
+	CFLAGS="$default_CFLAGS -march=rv32gc -mabi=ilp32"
+	LDFLAGS="-march=rv32gc -mabi=ilp32"
 	install_subdir="`echo $host_alias | sed -e 's/64/32/g'`"
 	;;
   *)

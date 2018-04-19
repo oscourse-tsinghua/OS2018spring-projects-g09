@@ -47,7 +47,10 @@ SECTIONS
   .htif :
   {
     PROVIDE( __htif_base = . );
-    *(.htif)
+    tohost = . ;
+    . = . + 64;
+    fromhost = . ;
+    . = . + 64;
   }
   . = ALIGN(0x1000);
 
