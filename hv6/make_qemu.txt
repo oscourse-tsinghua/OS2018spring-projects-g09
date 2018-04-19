@@ -1,0 +1,79 @@
+[   10.557758] tsc: 2590 MHz
+[   10.562189] acpi: RSDP 0x00000000000F68B0 000014 (v00 BOCHS )
+[   10.563323] acpi: RSDT 0x0000000007FE20F0 000038 (v01 BOCHS  BXPCRSDT 00000001 BXPC 00000001)
+[   10.564076] acpi: FACP 0x0000000007FE1EC8 0000F4 (v03 BOCHS  BXPCFACP 00000001 BXPC 00000001)
+[   10.564759] acpi: APIC 0x0000000007FE1FBC 000078 (v01 BOCHS  BXPCAPIC 00000001 BXPC 00000001)
+[   10.565362] acpi: HPET 0x0000000007FE2034 000038 (v01 BOCHS  BXPCHPET 00000001 BXPC 00000001)
+[   10.565991] acpi: MCFG 0x0000000007FE206C 00003C (v01 BOCHS  BXPCMCFG 00000001 BXPC 00000001)
+[   10.566658] acpi: DMAR 0x0000000007FE20A8 000048 (v01 BOCHS  BXPCDMAR 00000001 BXPC 00000001)
+[   10.567423] e820: 0x0000000000000000-0x000000000009fbff: RAM
+[   10.568111] e820: 0x000000000009fc00-0x000000000009ffff: reserved
+[   10.569874] e820: 0x00000000000f0000-0x00000000000fffff: reserved
+[   10.571550] e820: 0x0000000000100000-0x0000000007fdefff: RAM
+[   10.573314] e820: 0x0000000007fdf000-0x0000000007ffffff: reserved
+[   10.575147] e820: 0x00000000b0000000-0x00000000bfffffff: reserved
+[   10.576798] e820: 0x00000000fed1c000-0x00000000fed1ffff: reserved
+[   10.578448] e820: 0x00000000fffc0000-0x00000000ffffffff: reserved
+[   10.580560] pmap: _start 0x0000000000200000
+[   10.582076] pmap: _etext 0x00000000002125e2
+[   10.583695] pmap: _edata 0x0000000000848160
+[   10.585227] pmap: _end   0x0000000003600000
+[   10.587019] mtrr: 8 variable ranges
+[   10.588807] mtrr: 0x00000000c0000000-0x00000000ffffffff: uncacheable
+[   10.590786] xapic: xAPIC starting at 0x00000000fee00000
+[   10.592535] xapic: version 50014
+[   10.594716] svm: enabled
+[   10.598011] iommu: DRHD base address 0x00000000fed90000
+[   10.599723] iommu: cap 0x0012008c22260206 ecap 0x0000000000f00f4a
+[   10.601363] iommu: 3-level page table
+[   10.708157] iommu: DMA remapping enabled
+[   10.710356] iommu: interrupt remapping enabled
+[   10.712386] iommu: no posted interrupts
+[   10.714504] iommu: 0x0000000000200000-0x00000000011fffff: protected low memory
+[   10.718340] iommu: 0x0000000001400000-0x00000000035fffff: protected high memory
+[   10.722203] iommu: no plmr/phmr
+[   10.729054] pci: base address 0xb0000000 segment 0x0000 [bus 0x00-0xff]
+[   10.731435] pci: use Enhanced Configuration Access Mechanism
+[   10.734203] pci: 00:00.0 8086:29c0 06.00.00 bridge
+[   10.736432] pci: 00:01.0 1234:1111 03.00.00 display
+[   10.738015] pci: 00:02.0 8086:100e 02.00.00 network
+[   10.744111] pci:   BAR 0 [mem 0xfebc0000-0xfebdffff]
+[   10.747435] pci:   BAR 1 [io  0xc000-0xc03f]
+[   10.750306] pci: 00:03.0 8086:5845 01.08.02 mass storage
+[   10.757503] pci:   BAR 0 [mem 0xfebf0000-0xfebf1fff]
+[   10.761660] pci:   BAR 4 [mem 0xfebf3000-0xfebf3fff]
+[   10.765558] pci: 00:1f.0 8086:2918 06.01.00 bridge
+[   10.767749] pci: 00:1f.2 8086:2922 01.06.01 mass storage
+[   10.769373] pci: 00:1f.3 8086:2930 0c.05.00 serial bus
+[   10.967745] CONFIG_FPU           = 1
+[   10.969322] CONFIG_PREEMPT       = 0
+[   10.970782] CONFIG_PREEMPT_TIMER = 100
+[   10.972331] CONFIG_VPID          = 0
+[   10.973880] CONFIG_MEMFS         = 1
+[   10.975478] CONFIG_NVME          = 0
+[   10.976937] CONFIG_CGA           = 1
+[   10.978470] commit 4ec15aa on master
+[   10.979981] checking invariants
+[   10.990893] checking invariants done
+fs: use memfs
+fs: size 1000 nblocks 904 ninodes 4000 nlog 30
+ns: waiting for link to come up
+ns: link up at 1000 Mb/s full-duplex
+ns: MAC address in EEPROM
+ns: ether 52:54:00:12:34:56
+ns: no caplist
+ns: dhcp initializing
+ns: inet 10.0.2.15 netmask 255.255.255.0 broadcast 10.0.2.2
+init: starting httpd
+init: starting vncd
+init: starting sh
+httpd: waiting for http connections...
+vncd: 1322 8x16 glyphs
+vncd: waiting for vnc connections...
+$ 
+$ 
+$ 
+$ 
+$ 
+$ QEMU: Terminated
+
