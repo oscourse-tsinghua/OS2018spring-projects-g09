@@ -26,7 +26,7 @@
 # (openssl) must be installed.
 CONFIG_FS_NET=y
 # SDL support (optional)
-CONFIG_SDL=y
+#CONFIG_SDL=y
 # if set, compile the 128 bit emulator. Note: the 128 bit target does
 # not compile if gcc does not support the int128 type (32 bit hosts).
 CONFIG_INT128=y
@@ -46,11 +46,11 @@ EXE=
 endif
 CC=$(CROSS_PREFIX)gcc
 STRIP=$(CROSS_PREFIX)strip
-CFLAGS=-O2 -Wall -g -Werror -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -MMD
+CFLAGS=-O2 -Wall -g -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -MMD
 CFLAGS+=-D_GNU_SOURCE -DCONFIG_VERSION=\"$(shell cat VERSION)\"
 LDFLAGS=
 
-bindir=/usr/local/bin
+bindir=$(RISCV)/bin
 INSTALL=install
 
 PROGS+= riscvemu32$(EXE) riscvemu64$(EXE)
