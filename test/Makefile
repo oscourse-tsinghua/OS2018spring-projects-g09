@@ -9,7 +9,7 @@ CC		:= $(GCCPREFIX)gcc
 CFLAGS  := -mcmodel=medany -std=gnu99 -Wno-unused -Werror
 CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
-CFLAGS  += -I. -Ilibs
+CFLAGS  += -I. -Ilibs -Isrc
 CTYPE	:= c S
 
 LD      := $(GCCPREFIX)ld
@@ -19,13 +19,18 @@ LDFLAGS	+= -nostdlib --gc-sections
 OBJCOPY := $(GCCPREFIX)objcopy
 OBJDUMP := $(GCCPREFIX)objdump
 
+SRC_FILES = $(wildcard src/*.c)
+SRC_OBJS = $(subst src/,build/, $(subst .c,.o, $(SRC_FILES)))
+LIBS_FILES = $(wildcard libs/*.c)
+LIBS_OBJS = $(subst libs/,build/, $(subst .c,.o, $(LIBS_FILES)))
+
 all: build build/test.elf build/test.s build/test.img build/test.bin
 
 build:
 	mkdir build
 
-build/test.elf: build/test.o test.lds
-	$(LD) $(LDFLAGS) -T test.lds -o $@ $<
+build/test.elf: $(SRC_OBJS) $(LIBS_OBJS)
+	$(LD) $(LDFLAGS) -T test.lds -o $@ $^
 
 %.s: %.elf
 	$(OBJDUMP) -d $< > $@
@@ -46,5 +51,8 @@ build/test.elf: build/test.o test.lds
 run: all
 	-riscvemu test.cfg
 
-build/%.o: src/%.c
+$(LIBS_OBJS) : build/%.o: libs/%.c
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(SRC_OBJS) : build/%.o: src/%.c
 	$(CC) -c $< -o $@ $(CFLAGS)
