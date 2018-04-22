@@ -3,6 +3,7 @@
 .section .text
 
 .global	_start
+#if 0
 _start:
 	movq	$stack_top, %rsp
 	/* ulib entry point */
@@ -10,8 +11,10 @@ _start:
 	call	*%rax
 	/* return from ulib_init */
 	call	main
+#endif
+_start:
 spin:
-	jmp	spin
+	j	spin
 
 .section .bss
 .balign	PAGE_SIZE

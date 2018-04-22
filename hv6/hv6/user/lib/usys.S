@@ -3,12 +3,19 @@
 #include "linux.h"
 #include "syscall.h"
 
+#if 0
+///
 #define SYSCALL(sym)						\
 	.global	sys_##sym;					\
 	sys_##sym:						\
 		movq	$SYS_##sym, %rax;			\
 		vmcall;						\
 		ret
+#endif
+#define SYSCALL(sym)						\
+	.global	sys_##sym;					\
+	sys_##sym:						\
+		j	sys_##sym			\
 
 SYSCALL(map_page_desc)
 SYSCALL(map_pml4)
@@ -65,6 +72,8 @@ SYSCALL(debug_dmesg)
 SYSCALL(debug_sysctl)
 
 .global	exec
+#if 0
+///
 exec:
 	/* push rbp to align the stack; also good for stacktrace */
 	push	%rbp
@@ -77,14 +86,24 @@ exec:
 	movq	%rbp, %rsp
 	pop	%rbp
 	ret
+#endif
+exec:
+	j exec
 
 .global fexec
+#if 0
+///
 fexec:
 	movq	$ulib_stack_top, %rsp
 	/* do_fexec doesn't return */
 	jmp	do_fexec
+#endif
+fexec:
+	j fexec
 
 .global linux_syscall_entry
+#if 0
+///
 linux_syscall_entry:
 	/* save syscall return address (to fake a regular return) */
 	push	%rcx
@@ -109,3 +128,6 @@ linux_syscall_entry:
 2:
 	popfq
 	retq
+#endif
+linux_syscall_entry:
+	j linux_syscall_entry

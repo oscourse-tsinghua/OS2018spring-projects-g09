@@ -1504,8 +1504,8 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
 		fprintf(stderr, "riscvemu exit because of s->insn_counter always same\n");
 		exit(1);
 	}
-	if (s->insn_counter > 100000) {
-		fprintf(stderr, "riscvemu exit because of s->insn_counter = %d\n", s->insn_counter);
+	if (s->insn_counter > 10000000) {
+		fprintf(stderr, "riscvemu exit because of s->insn_counter = %d is too large\n", s->insn_counter);
 		exit(1);
 	}
 

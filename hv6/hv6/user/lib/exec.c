@@ -107,10 +107,11 @@ noreturn void do_fexec(int fd, char *argv[])
      *   %rsp: point to the structure above
      *   %rdx: function pointer for application to register with atexit
      */
-    asm volatile("movq %0, %%rsp; jmpq *%1"
-                 :
-                 : "i"(USTACK_TOP - PAGE_SIZE), "r"(entry), "d"(0)
-                 : "memory", "cc");
+    /// asm volatile("movq %0, %%rsp; jmpq *%1"
+    //              :
+    //              : "i"(USTACK_TOP - PAGE_SIZE), "r"(entry), "d"(0)
+    //              : "memory", "cc");
+    while(1);
     __builtin_unreachable();
 }
 

@@ -72,7 +72,7 @@ HV6_UPROGS :=                       \
         $(O)/hv6/user/vmstat        \
         $(O)/hv6/user/wc            \
         $(O)/hv6/user/wttr          \
-        $(O)/hv6/user/vncd          \
+        #$(O)/hv6/user/vncd          \
 
 HV6_LINUX_UPROGS :=                 \
         hv6/user/linux/bench_linux  \
@@ -130,7 +130,7 @@ HV6_UPROGS_ASMS := $(addsuffix .asm,$(HV6_UPROGS))
 -include $(HV6_UPROGS_OBJS:.o=.d)
 -include $(HV6_LWIP_OBJS:.o=.d)
 
-$(HV6_ULIB_OBJS): CFLAGS += -mcmodel=kernel
+#$(HV6_ULIB_OBJS): CFLAGS += -mcmodel=kernel
 
 $(HV6_INIT_OBJS) \
 $(HV6_ULIB_OBJS) \

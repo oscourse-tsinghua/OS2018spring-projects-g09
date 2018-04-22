@@ -2,6 +2,8 @@ HV6_BIN := $(O)/hv6.bin
 HV6_ELF := $(basename $(HV6_BIN)).elf
 HV6_ASM := $(basename $(HV6_BIN)).asm
 HV6_ISO := $(basename $(HV6_BIN)).iso
+HV6_BBL := $(basename $(HV6_BIN)).bbl
+HV6_BBL_IMG := $(basename $(HV6_BIN)).bbl.img
 
 HV6_LLS :=                     \
         $(O)/hv6/device.ll     \

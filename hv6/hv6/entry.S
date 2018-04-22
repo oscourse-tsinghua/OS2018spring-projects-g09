@@ -11,6 +11,8 @@
  * necessary for context switching.
  */
 
+#if 0
+///
 .macro	SYS_WRAP	proc
 	/* save all GP registers (except %rax) */
 	SAVE_EXTRA_REGS	offset=8
@@ -27,6 +29,14 @@
 	/* set the return value */
 	movq	%rax, TRAP_REGS_RAX+8(%rsp)
 	jmp	run_current
+.endm
+#endif
+
+spin:
+	j spin
+
+.macro	SYS_WRAP	proc
+	j spin
 .endm
 
 .global	sys_clone

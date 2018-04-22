@@ -113,7 +113,8 @@ static int linux_arch_prctl(int code, uintptr_t addr)
 {
     switch (code) {
     case ARCH_SET_FS:
-        asm volatile("wrfsbase %0" : : "r"(addr));
+        /// asm volatile("wrfsbase %0" : : "r"(addr));
+        while(1);
         break;
     default:
         assert(false, "unknown code");

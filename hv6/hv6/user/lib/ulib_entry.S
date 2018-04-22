@@ -4,6 +4,9 @@
 
 .global	_start
 _start:
+	j _start
+#if 0
+_start:
 	push	%rbp
 	movq	%rsp, %rbp
 	movq	$ulib_stack_top, %rsp
@@ -11,6 +14,7 @@ _start:
 	movq	%rbp, %rsp
 	pop	%rbp
 	ret
+#endif
 
 .section .bss
 .balign	PAGE_SIZE

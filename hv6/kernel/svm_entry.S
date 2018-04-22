@@ -5,6 +5,9 @@
 
 .global	svm_loop
 svm_loop:
+	j svm_loop
+#if 0
+svm_loop:
 	LOAD_FPU_REGS
 	LOAD_EXTRA_REGS
 	LOAD_RAX_REG
@@ -69,3 +72,4 @@ handle_intr:
 	LOAD_RAX_REG
 	/* don't change %rip */
 	jmp	svm_fast_path
+#endif

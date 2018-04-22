@@ -1,6 +1,7 @@
 #include <machine/memlayout.h>
 
-OUTPUT_ARCH(i386:x86-64)
+//OUTPUT_ARCH(i386:x86-64)
+OUTPUT_ARCH(riscv)
 
 SECTIONS
 {

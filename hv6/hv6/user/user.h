@@ -74,10 +74,11 @@ static __always_inline int sys_clone(pid_t pid, pn_t pml4, pn_t stack, pn_t hvm)
 {
     int r;
 
-    asm volatile("vmcall"
-                 : "=a"(r)
-                 : "D"(pid), "S"(pml4), "d"(stack), "c"(hvm), "a"(SYS_clone)
-                 : "cc", "memory");
+    /// asm volatile("vmcall"
+    //              : "=a"(r)
+    //              : "D"(pid), "S"(pml4), "d"(stack), "c"(hvm), "a"(SYS_clone)
+    //              : "cc", "memory");
+    while(1);
     return r;
 }
 int sys_set_proc_name(uint64_t name0, uint64_t name1);

@@ -1,7 +1,7 @@
 -include config.mk
 
 PROJECT      ?= hv6
-ARCH         ?= x86_64
+ARCH         ?= riscv64
 O            ?= o.$(ARCH)
 NR_CPUS      ?= 1
 QEMU_ACCEL   ?= kvm:tcg
@@ -36,8 +36,8 @@ CFLAGS       += -fno-PIE
 CFLAGS       += -ffreestanding -MD -MP
 CFLAGS       += -Wall
 CFLAGS       += -g
-CFLAGS       += -mno-red-zone
-CFLAGS       += -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx
+#CFLAGS       += -mno-red-zone
+#CFLAGS       += -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx
 CFLAGS       += -DCOMMIT_HASH=$(shell git rev-parse --short --verify HEAD)
 CFLAGS       += -DCOMMIT_BRANCH=$(shell git rev-parse --abbrev-ref --verify HEAD)
 CFLAGS       += -imacros kernel/config.h
@@ -86,6 +86,9 @@ ifeq ($(UNAME_S),Darwin)
 USE_CLANG    ?= 1
 TOOLPREFIX   ?= $(ARCH)-linux-gnu-
 endif
+ifeq ($(ARCH), riscv64)
+TOOLPREFIX   ?= $(ARCH)-unknown-elf-
+endif
 
 ifdef USE_CLANG
 CC           := $(LLVM_CC)
@@ -115,7 +118,22 @@ ifdef QEMUEXTRA
 QEMUOPTS     += $(QEMUEXTRA)
 endif
 
-all: $(PROJECT)
+all: $(PROJECT) $(HV6_BBL_IMG)
+
+$(HV6_BBL): $(HV6_ELF)
+	cd ../riscv-pk && \
+	rm -rf build && \
+	mkdir build && \
+	cd build && \
+	../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../hv6/$<  --disable-fp-emulation --enable-logo && \
+	make && \
+	cp bbl ../../hv6/$(HV6_BBL)
+
+$(HV6_BBL_IMG): $(HV6_BBL)
+	$(OBJCOPY) -O binary $< $@
+
+run: $(HV6_BBL_IMG)
+	-riscvemu run.cfg
 
 verify: $(PROJECT)-verify
 

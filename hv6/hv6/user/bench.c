@@ -26,12 +26,13 @@ static void benchmark_syscall(void)
     for (i = 0; i < N; i++) {
         int ret;
 
-        asm volatile("movq $0, %%rax\n\t" /* nop */
-                     "vmcall\n\t"
-                     "mov %%eax, %0\n\t"
-                     : "=r"(ret)
-                     :
-                     : "rax");
+        /// asm volatile("movq $0, %%rax\n\t" /* nop */
+        //              "vmcall\n\t"
+        //              "mov %%eax, %0\n\t"
+        //              : "=r"(ret)
+        //              :
+        //              : "rax");
+        while(1);
     }
 
     printf(1, "System call took %ld cycles\n", (rdtscllp() - t0 - overhead) / N);

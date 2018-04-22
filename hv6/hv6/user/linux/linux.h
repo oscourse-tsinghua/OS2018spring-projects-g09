@@ -123,7 +123,7 @@ struct linux_stat {
     uint64_t st_mtime_nsec;
     uint64_t st_ctime;
     uint64_t st_ctime_nsec;
-    int64_t __unused[3];
+    int64_t __padding[3];
 };
 
 #define S_IFMT 0170000

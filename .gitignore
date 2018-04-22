@@ -1,6 +1,7 @@
 .settings
 .cproject
 .project
+.vscode
 
 # Prerequisites
 *.d

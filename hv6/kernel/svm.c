@@ -98,7 +98,8 @@ static void svm_switch(void *arg, void *stack, register_t cr3, timer_t timer, in
     /* svm_loop will load this */
     regs->rax = (register_t)vmcb;
     /* reset the kernel stack pointer before starting user space */
-    asm volatile("movq %0, %%rsp; jmp svm_loop" : : "r"(regs) : "memory", "cc");
+    ///asm volatile("movq %0, %%rsp; jmp svm_loop" : : "r"(regs) : "memory", "cc");
+    while(1);
     __builtin_unreachable();
 }
 

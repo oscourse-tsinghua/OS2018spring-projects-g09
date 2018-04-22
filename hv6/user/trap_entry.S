@@ -4,6 +4,14 @@
 .section .text
 
 .macro	TRAP_ENTRY nr name handler has_error_code:req
+.align 2
+\name:
+	j \name
+.endm
+
+#if 0
+///
+.macro	TRAP_ENTRY nr name handler has_error_code:req
 .align	2
 \name:
 	/* push 0 if the hardware doesn't push error code */
@@ -23,20 +31,33 @@
 	callq	\handler
 	jmp	trap_common_exit
 .endm
+#endif
 
+trap_common_entry:
+	j trap_common_entry
+
+#if 0
+///
 trap_common_entry:
 	SAVE_C_REGS	offset=8
 	SAVE_EXTRA_REGS	offset=8
 	/* prevent stack backtrace for now */
 	movq	$0, %rbp
 	ret
+#endif
 
+trap_common_exit:
+	j trap_common_exit
+
+#if 0
+///
 trap_common_exit:
 	LOAD_EXTRA_REGS	offset=0
 	LOAD_C_REGS	offset=0
 	/* skip trap_regs and error code */
 	addq	$TRAP_REGS_SIZE+8, %rsp
 	iretq
+#endif
 
 TRAP_ENTRY	0	vector0		trap	has_error_code=0
 TRAP_ENTRY	1	vector1		trap	has_error_code=0

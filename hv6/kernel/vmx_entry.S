@@ -3,6 +3,10 @@
 
 .global	vmx_entry
 vmx_entry:
+	j vmx_entry
+#if 0
+///
+vmx_entry:
 	SAVE_C_REGS_EXCEPT_RAX
 	/* use r10-11 as temporary registers */
 
@@ -26,21 +30,31 @@ vmx_entry:
 	/* vmx_dispatch will call vmclear so vmlaunch is okay later */
 	callq	vmx_dispatch
 	jmp	vmx_resume
+#endif
 
 .global	vmx_launch
+vmx_launch:
+	j vmx_launch
+#if 0
 vmx_launch:
 	LOAD_FPU_REGS
 	LOAD_EXTRA_REGS
 	LOAD_C_REGS
 	vmlaunch
+#endif
 
 .global	vmx_resume
+vmx_resume:
+	j vmx_resume
+#if 0
 vmx_resume:
 	LOAD_FPU_REGS
 	LOAD_EXTRA_REGS
 	LOAD_C_REGS
 	vmresume
+#endif
 
+#if 0
 handle_syscall:
 	/* bump rip to skip vmcall */
 	movq	$VMCS_GUEST_RIP, %r11
@@ -74,3 +88,4 @@ handle_ext_intr:
 	callq	vmx_extintr
 	LOAD_C_REGS
 	vmresume
+#endif

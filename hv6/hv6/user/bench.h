@@ -6,23 +6,35 @@
 #define NRPGS 100
 #define N 10000
 
+/// static inline void synch_tsc(void)
+// {
+//     asm volatile("cpuid" : : : "%rax", "%rbx", "%rcx", "%rdx");
+// }
 static inline void synch_tsc(void)
 {
-    asm volatile("cpuid" : : : "%rax", "%rbx", "%rcx", "%rdx");
+    while(1);
 }
 
+/// static inline unsigned long rdtscll(void)
+// {
+//     unsigned int a, d;
+//     asm volatile("rdtsc" : "=a"(a), "=d"(d) : : "%rbx", "%rcx");
+//     return ((unsigned long)a) | (((unsigned long)d) << 32);
+// }
 static inline unsigned long rdtscll(void)
 {
-    unsigned int a, d;
-    asm volatile("rdtsc" : "=a"(a), "=d"(d) : : "%rbx", "%rcx");
-    return ((unsigned long)a) | (((unsigned long)d) << 32);
+    while(1);
 }
 
+/// static inline unsigned long rdtscllp(void)
+// {
+//     unsigned int a, d;
+//     asm volatile("rdtscp" : "=a"(a), "=d"(d) : : "%rbx", "%rcx");
+//     return ((unsigned long)a) | (((unsigned long)d) << 32);
+// }
 static inline unsigned long rdtscllp(void)
 {
-    unsigned int a, d;
-    asm volatile("rdtscp" : "=a"(a), "=d"(d) : : "%rbx", "%rcx");
-    return ((unsigned long)a) | (((unsigned long)d) << 32);
+    while(1);
 }
 
 static unsigned long measure_tsc_overhead(void)

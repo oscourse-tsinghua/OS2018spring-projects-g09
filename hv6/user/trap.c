@@ -42,19 +42,20 @@ void trap_init(void)
         set_gate_desc(&idt[i], 0, GDT_CS, trap_vectors[i], KERNEL_PL);
     lgdt(&gdt_desc);
 
-    asm volatile("mov	$16, %%ax\n"
-                 "mov	%%ax, %%ds\n"
-                 "mov	%%ax, %%es\n"
-                 "mov	%%ax, %%ss\n"
-                 "mov	$8, %%rax\n"
-                 "pushq	%%rax\n"
-                 "pushq	$1f\n"
-                 "lretq\n"
-                 "1:\n"
-                 "nop"
-                 :
-                 :
-                 : "rax");
+    while(1);
+    /// asm volatile("mov	$16, %%ax\n"
+    //              "mov	%%ax, %%ds\n"
+    //              "mov	%%ax, %%es\n"
+    //              "mov	%%ax, %%ss\n"
+    //              "mov	$8, %%rax\n"
+    //              "pushq	%%rax\n"
+    //              "pushq	$1f\n"
+    //              "lretq\n"
+    //              "1:\n"
+    //              "nop"
+    //              :
+    //              :
+    //              : "rax");
 
     ltr(GDT_TSS);
     lidt(&idt_desc);

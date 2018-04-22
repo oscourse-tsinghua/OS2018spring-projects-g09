@@ -255,10 +255,11 @@ static void vmx_switch(void *vmcs, void *stack, register_t cr3, timer_t timer, i
 
     vmwrite(VMCS_HOST_RSP, (uintptr_t)regs);
 
-    asm volatile("cmpl $0, %0; movq %1, %%rsp; je vmx_launch; jmp vmx_resume"
-                 :
-                 : "r"(launched), "r"(regs)
-                 : "memory", "cc");
+    /// asm volatile("cmpl $0, %0; movq %1, %%rsp; je vmx_launch; jmp vmx_resume"
+    //              :
+    //              : "r"(launched), "r"(regs)
+    //              : "memory", "cc");
+    while(1);
     __builtin_unreachable();
 }
 

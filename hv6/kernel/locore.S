@@ -20,6 +20,8 @@ multiboot_header:
 	.long	_end
 	.long	start_multiboot
 
+#if 0
+///
 /*
  * eax: magic value
  * ebx: physical address of the multiboot structure
@@ -52,8 +54,13 @@ start_multiboot:
 
 	/* set BSP's stack */
 	movl	$(stack_top - TRAP_REGS_SIZE), %esp
+#endif
+start_multiboot:
+	j start_multiboot
 
 .global	start_common
+#if 0
+///
 start_common:
 	/* CR4: enable PAE, PSE */
 	movl	%cr4, %eax
@@ -84,15 +91,30 @@ start_common:
 
 	/* enter 64-bit mode */
 	ljmp	$GDT_CS, $start64
+#endif
+start_common:
+	j start_common
 
+#if 0
+///
 error_no_mb:
 	lea	msg_no_mb, %esi
 	jmp	error
+#endif
+error_no_mb:
+	j error_no_mb
 
+#if 0
+///
 error_no_lm:
 	lea	msg_no_lm, %esi
 	jmp	error
+#endif
+error_no_lm:
+	j error_no_lm
 
+#if 0
+///
 error:
 	/* write to COM1 */
 	movl	$0x3f8, %edx
@@ -108,13 +130,23 @@ error_end:
 spin:
 	hlt
 	jmp	spin
+#endif
+error:
+error_loop:
+error_end:
+spin:
+	j spin
 
+#if 0
 .code64
 start64:
 	movq	$0x0, %rbp
 	call	main
 
 	jmp	spin
+#endif
+start64:
+	j spin
 
 .section .rodata
 msg_no_mb:

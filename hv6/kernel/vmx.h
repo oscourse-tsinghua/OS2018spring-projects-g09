@@ -266,7 +266,8 @@ typedef uint16_t vpid_t;
 static inline void invvpid(uint64_t mode, uintptr_t linaddr, uint16_t vpid)
 {
     __uint128_t desc = ((__uint128_t) linaddr) << 64 | vpid;
-    asm volatile ("invvpid (%0), %1" : : "r" (&desc), "r" (mode) : "memory");
+    ///asm volatile ("invvpid (%0), %1" : : "r" (&desc), "r" (mode) : "memory");
+    while(1);
 }
 
 static inline vpid_t pid_vpid(pid_t pid)
