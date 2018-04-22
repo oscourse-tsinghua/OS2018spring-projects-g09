@@ -139,7 +139,7 @@ splitimg: splitimg.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 install: $(PROGS)
-	$(STRIP) $(PROGS)
+	#$(STRIP) $(PROGS)
 	$(INSTALL) -m755 $(PROGS) "$(DESTDIR)$(bindir)"
 
 %.o: %.c
