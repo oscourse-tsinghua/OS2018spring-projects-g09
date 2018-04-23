@@ -5,7 +5,7 @@ ARCH         ?= riscv64
 O            ?= o.$(ARCH)
 NR_CPUS      ?= 1
 QEMU_ACCEL   ?= kvm:tcg
-QEMU_CPU     ?= max
+QEMU_CPU     ?= any
 QEMU_DISPLAY ?= none
 # some Ubuntu doesn't have e1000e
 QEMU_NIC     ?= e1000
@@ -104,7 +104,7 @@ OBJDUMP      := $(TOOLPREFIX)objdump
 GDB          := $(TOOLPREFIX)gdb
 
 QEMU         := qemu-system-$(ARCH)
-QEMUOPTS     += -M q35,accel=$(QEMU_ACCEL),kernel-irqchip=split -cpu $(QEMU_CPU)
+QEMUOPTS     += -M spike,accel=$(QEMU_ACCEL),kernel-irqchip=split -cpu $(QEMU_CPU)
 QEMUOPTS     += -serial mon:stdio -s
 QEMUOPTS     += -display $(QEMU_DISPLAY)
 QEMUOPTS     += -smp cpus=$(NR_CPUS)

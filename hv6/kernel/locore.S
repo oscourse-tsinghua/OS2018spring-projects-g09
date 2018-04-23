@@ -8,7 +8,13 @@
 
 #define MULTIBOOT_HEADER_FLAGS	(MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | MULTIBOOT_AOUT_KLUDGE)
 
+
 .section .head.text
+kern_entry:
+    la sp, bootstacktop
+
+    j main
+
 .balign	4
 multiboot_header:
 	.long   MULTIBOOT_HEADER_MAGIC
@@ -165,6 +171,13 @@ gdt:
 gdtend:
 
 .section .data
+    # .align 2^12
+    .align PAGE_SHIFT
+    .global bootstack
+bootstack:
+    .space STACK_SIZE
+    .global bootstacktop
+bootstacktop:
 .balign	8
 .global	multiboot_info
 multiboot_info:
