@@ -1,0 +1,2 @@
+openocd -f spike.cfg
+
