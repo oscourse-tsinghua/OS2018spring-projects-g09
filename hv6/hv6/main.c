@@ -35,6 +35,8 @@ static void print_version(void);
 
 void main(void)
 {
+    printf("%s\n\n", "hv6-riscv os is loading ...\n");
+    
     arch_init();
     vm_init();
     user_init(INITPID);

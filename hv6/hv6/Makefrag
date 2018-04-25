@@ -97,30 +97,32 @@ $(HV6_LINUX_UPROGS):
 
 hv6: $(HV6_BIN) $(HV6_ASM) $(O)/hv6/ulib.asm $(O)/hv6/fs.img
 
-HV6_QEMUOPTS = $(QEMUOPTS) -drive file=$(O)/hv6/fs.img,format=raw,if=none,id=fs -device nvme,drive=fs,serial=hv6
+HV6_QEMUOPTS = $(QEMUOPTS) -drive file=$(O)/hv6/fs.img,format=raw,if=none,id=fs
 
 $(HV6_ELF): $(HV6_KERNEL_OBJS) $(KERNEL_LDS)
 	$(QUIET_LD)$(LD) -o $@ -T $(KERNEL_LDS) $(HV6_KERNEL_OBJS)
 
 hv6-qemu: hv6
-	$(QEMU) $(HV6_QEMUOPTS) -kernel $(HV6_BIN)
+	$(QEMU) $(HV6_QEMUOPTS) -kernel $(HV6_BBL)
 
 hv6-qemu-iso: iso
 	$(QEMU) $(HV6_QEMUOPTS) -cdrom $(HV6_ISO)
 
 hv6-qemu-gdb: hv6
-	$(QEMU) $(HV6_QEMUOPTS) -S -kernel $(HV6_BIN)
+	$(QEMU) $(HV6_QEMUOPTS) -S -kernel $(HV6_BBL)
 
 # workaround for gdb's "reply too long"
 hv6-gdb:
 	$(GDB) \
-	-ex "set arch i386:x86-64:intel" \
+	-ex "set arch riscv:rv64" \
 	-ex "target remote 0.0.0.0:1234" \
 	-ex "symbol $(HV6_ELF)" \
+	-ex "set riscv use_compressed_breakpoint off" \
 	-ex "b main" \
+	-ex "b *0x80200000" \
 	-ex "c" \
 	-ex "disconnect" \
-	-ex "set arch i386:x86-64" \
+	-ex "set arch riscv" \
 	-ex "target remote 0.0.0.0:1234" \
 	-ex "c"
 
