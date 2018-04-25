@@ -1,5 +1,6 @@
 #include <uapi/console.h>
 #include <uapi/errno.h>
+#include <uapi/cdefs.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>

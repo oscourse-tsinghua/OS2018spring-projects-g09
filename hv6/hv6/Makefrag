@@ -3,6 +3,7 @@ HV6_ELF := $(basename $(HV6_BIN)).elf
 HV6_ASM := $(basename $(HV6_BIN)).asm
 HV6_ISO := $(basename $(HV6_BIN)).iso
 HV6_BBL := $(basename $(HV6_BIN)).bbl
+HV6_BBL_ASM := $(basename $(HV6_BIN)).bbl.asm
 HV6_BBL_IMG := $(basename $(HV6_BIN)).bbl.img
 
 HV6_LLS :=                     \
@@ -65,6 +66,13 @@ HV6_KERNEL_SRCS +=             \
         drivers/pci.c          \
         drivers/uart_porte9.c  \
 
+HV6_KERNEL_SRCS +=             \
+        libs/console.c     \
+        libs/printfmt.c           \
+        libs/readline.c          \
+        libs/stdio.S        \
+        libs/string.c         \
+
 $(O)/hv6/entry.o               \
 $(O)/hv6/trap_entry.o          \
 $(O)/hv6/user/lib/trap_entry.o \
@@ -86,7 +94,7 @@ $(HV6_KERNEL_OBJS): CFLAGS += -fno-stack-protector -I kernel -I hv6
 $(HV6_LLS): CFLAGS += -I kernel
 
 # include user specific makefile rules
-include hv6/user/Makefrag
+#include hv6/user/Makefrag
 
 $(O)/hv6/%.asm: $(O)/hv6/%
 	$(QUIET_GEN)$(OBJDUMP) -S $< > $@
@@ -95,7 +103,7 @@ $(O)/hv6/%.asm: $(O)/hv6/%
 $(HV6_LINUX_UPROGS):
 	@:
 
-hv6: $(HV6_BIN) $(HV6_ASM) $(O)/hv6/ulib.asm $(O)/hv6/fs.img
+hv6: $(HV6_BIN) $(HV6_ASM) #$(O)/hv6/ulib.asm $(O)/hv6/fs.img
 
 HV6_QEMUOPTS = $(QEMUOPTS) -drive file=$(O)/hv6/fs.img,format=raw,if=none,id=fs -device nvme,drive=fs,serial=hv6
 

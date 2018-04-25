@@ -1,3 +1,6 @@
+#ifndef __MULTI_DEFS__
+#define __MULTI_DEFS__
+
 #pragma once
 
 #ifndef __ASSEMBLER__
@@ -216,3 +219,5 @@ void vsyslog(int priority, const char *fmt, va_list ap) __printf(2, 0);
 int syslog_read(void *dest, size_t n, size_t offset);
 
 #endif /* !__ASSEMBLER__ */
+
+#endif // __MULTI_DEFS__

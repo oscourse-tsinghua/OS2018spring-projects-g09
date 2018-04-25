@@ -24,7 +24,7 @@ SRC_OBJS = $(subst src/,build/, $(subst .c,.o, $(SRC_FILES)))
 LIBS_FILES = $(wildcard libs/*.c)
 LIBS_OBJS = $(subst libs/,build/, $(subst .c,.o, $(LIBS_FILES)))
 
-all: build build/test.elf build/test.s build/test.img build/test.bin
+all: build build/test.elf build/test.s build/test.img build/test.bbl build/test.bbl.s
 
 build:
 	mkdir build
@@ -33,9 +33,12 @@ build/test.elf: $(SRC_OBJS) $(LIBS_OBJS)
 	$(LD) $(LDFLAGS) -T test.lds -o $@ $^
 
 %.s: %.elf
-	$(OBJDUMP) -d $< > $@
+	$(OBJDUMP) -D $< > $@
 
-%.bin: %.elf
+build/test.bbl.s: build/test.bbl
+	$(OBJDUMP) -D $< > $@
+
+%.bbl: %.elf
 	cd ../riscv-pk && \
 	rm -rf build && \
 	mkdir build && \
@@ -44,7 +47,7 @@ build/test.elf: $(SRC_OBJS) $(LIBS_OBJS)
 	make && \
 	cp bbl ../../test/$@
 
-%.img: %.bin
+%.img: %.bbl
 	$(OBJCOPY) -O binary $< $@
 
 .PHONY : run

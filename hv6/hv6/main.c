@@ -20,6 +20,7 @@
 #include "proc.h"
 #include "vm.h"
 #include "invariants.h"
+#include <libs/stdio.h>
 
 static void vm_init(void);
 static void user_init(pid_t);
@@ -35,6 +36,10 @@ static void print_version(void);
 
 void main(void)
 {
+    libs_cprintf("Hello World\n");
+    while(1);
+	print_config();
+	while(1);
     arch_init();
     vm_init();
     user_init(INITPID);

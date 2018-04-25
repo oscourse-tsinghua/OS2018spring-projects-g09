@@ -32,10 +32,11 @@ QUIET_CXX     = $(Q:@=@echo    '     C++      '$@;)
 QUIET_AR      = $(Q:@=@echo    '     AR       '$@;)
 QUIET_RANLIB  = $(Q:@=@echo    '     RANLIB   '$@;)
 
-CFLAGS       += -fno-PIE
-CFLAGS       += -ffreestanding -MD -MP
+#CFLAGS       += -fno-PIE
+#CFLAGS       += -ffreestanding -MD -MP
 CFLAGS       += -Wall
 CFLAGS       += -g
+CFLAGS		 += -mcmodel=medany
 #CFLAGS       += -mno-red-zone
 #CFLAGS       += -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx
 CFLAGS       += -DCOMMIT_HASH=$(shell git rev-parse --short --verify HEAD)
@@ -43,7 +44,7 @@ CFLAGS       += -DCOMMIT_BRANCH=$(shell git rev-parse --abbrev-ref --verify HEAD
 CFLAGS       += -imacros kernel/config.h
 CFLAGS       += -I include -I $(O)/include
 
-KERNEL_CFLAGS = $(CFLAGS) -DNR_CPUS=$(NR_CPUS) -fwrapv -I $(PROJECT) -I kernel -I kernel/include
+KERNEL_CFLAGS = $(CFLAGS) -DNR_CPUS=$(NR_CPUS) -fwrapv -I $(PROJECT) -I kernel -I kernel/include -I .
 
 USER_CFLAGS   = $(CFLAGS)
 
@@ -118,7 +119,7 @@ ifdef QEMUEXTRA
 QEMUOPTS     += $(QEMUEXTRA)
 endif
 
-all: $(PROJECT) $(HV6_BBL_IMG)
+all: $(PROJECT) $(HV6_BBL_IMG) $(HV6_BBL_ASM)
 
 $(HV6_BBL): $(HV6_ELF)
 	cd ../riscv-pk && \
@@ -128,6 +129,9 @@ $(HV6_BBL): $(HV6_ELF)
 	../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../hv6/$<  --disable-fp-emulation --enable-logo && \
 	make && \
 	cp bbl ../../hv6/$(HV6_BBL)
+
+$(HV6_BBL_ASM): $(HV6_BBL)
+	$(OBJDUMP) -S $(HV6_BBL) > $(HV6_BBL_ASM)
 
 $(HV6_BBL_IMG): $(HV6_BBL)
 	$(OBJCOPY) -O binary $< $@
