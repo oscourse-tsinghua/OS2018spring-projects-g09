@@ -115,7 +115,7 @@ ifdef QEMUEXTRA
 QEMUOPTS     += $(QEMUEXTRA)
 endif
 
-all: $(PROJECT) $(HV6_BBL_IMG) $(HV6_BBL_ASM)
+all: $(PROJECT) $(HV6_BBL_IMG) $(HV6_BBL_ASM) $(HV6_BBL_DBG)
 
 $(HV6_BBL): $(HV6_ELF)
 	cd ../riscv-pk && \
@@ -125,12 +125,16 @@ $(HV6_BBL): $(HV6_ELF)
 	../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../hv6/$<  --disable-fp-emulation --enable-logo && \
 	make && \
 	cp bbl ../../hv6/$(HV6_BBL)
+	
 
 $(HV6_BBL_ASM): $(HV6_BBL)
 	$(OBJDUMP) -S $(HV6_BBL) > $(HV6_BBL_ASM)
 
 $(HV6_BBL_IMG): $(HV6_BBL)
 	$(OBJCOPY) -O binary $< $@
+
+$(HV6_BBL_DBG): $(HV6_ELF)
+	$(OBJCOPY)  $< $@ --adjust-vma 0x80000000
 
 run: $(HV6_BBL_IMG)
 	-riscvemu run.cfg
