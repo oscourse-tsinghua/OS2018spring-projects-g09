@@ -38,7 +38,7 @@ void main(void)
 {
     libs_cprintf("%s\n\n", "hv6-riscv os is loading ...\n");
     libs_cprintf("Hello World\n");
-    while(1);
+    //while(1);
 	print_config();
 	while(1);
     arch_init();

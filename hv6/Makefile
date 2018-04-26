@@ -6,7 +6,7 @@ O            ?= o.$(ARCH)
 NR_CPUS      ?= 1
 QEMU_ACCEL   ?= kvm:tcg
 QEMU_CPU     ?= any
-QEMU_DISPLAY ?= none
+QEMU_DISPLAY ?= none 
 # some Ubuntu doesn't have e1000e
 QEMU_NIC     ?= e1000
 BOCHS_CPU    ?= broadwell_ult
@@ -125,6 +125,15 @@ $(HV6_BBL): $(HV6_ELF)
 	../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../hv6/$<  --disable-fp-emulation --enable-logo && \
 	make && \
 	cp bbl ../../hv6/$(HV6_BBL)
+
+$(HV6_BBL_GDB): $(HV6_ELF)
+	cd ../riscv-pk-spike && \
+	rm -rf build && \
+	mkdir build && \
+	cd build && \
+	../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../hv6/$<  --disable-fp-emulation --enable-logo && \
+	make && \
+	cp bbl ../../hv6/$(HV6_BBL_GDB)
 	
 
 $(HV6_BBL_ASM): $(HV6_BBL)
@@ -135,6 +144,22 @@ $(HV6_BBL_IMG): $(HV6_BBL)
 
 $(HV6_BBL_DBG): $(HV6_ELF)
 	$(OBJCOPY)  $< $@ --adjust-vma 0x80000000
+	$(OBJDUMP) -D $@ >$@.asm
+
+gdb1: $(HV6_BBL_GDB) $(HV6_BBL_DBG)
+	spike --rbb-port=9824 -m0x80000000:0x1000000 $(HV6_BBL_GDB)
+
+gdb2: $(HV6_BBL_GDB) $(HV6_BBL_DBG)
+	openocd -f spike_gdb.cfg
+
+gdb3: $(HV6_BBL_GDB) $(HV6_BBL_DBG)
+	$(GDB) \
+	-ex "set arch riscv" \
+	-ex "symbol "$(HV6_BBL_DBG) \
+	-ex "target remote 0.0.0.0:3333" \
+	-ex "set riscv use_compressed_breakpoint off" \
+	-ex "b main" \
+	-ex "c"
 
 run: $(HV6_BBL_IMG)
 	-riscvemu run.cfg

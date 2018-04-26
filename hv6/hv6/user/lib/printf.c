@@ -350,7 +350,8 @@ void syslog(int priority, const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    vsyslog(priority, fmt, ap);
+    libs_vcprintf(fmt, ap);
+    //vsyslog(priority, fmt, ap);
     va_end(ap);
 }
 
