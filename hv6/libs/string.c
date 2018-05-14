@@ -1,15 +1,15 @@
-#include "string.h"
-#include "riscv.h"
+#include <string.h>
+#include <riscv.h>
 
 /* *
  * strlen - calculate the length of the string @s, not including
  * the terminating '\0' character.
- * @s:        the input string
+ * @s:      the input string
  *
  * The strlen() function returns the length of string @s.
  * */
 size_t
-libs_strlen(const char *s) {
+strlen(const char *s) {
     size_t cnt = 0;
     while (*s ++ != '\0') {
         cnt ++;
@@ -20,7 +20,7 @@ libs_strlen(const char *s) {
 /* *
  * strnlen - calculate the length of the string @s, not including
  * the terminating '\0' char acter, but at most @len.
- * @s:        the input string
+ * @s:      the input string
  * @len:    the max-length that function will scan
  *
  * Note that, this function looks only at the first @len characters
@@ -31,12 +31,25 @@ libs_strlen(const char *s) {
  * pointed by @s.
  * */
 size_t
-libs_strnlen(const char *s, size_t len) {
+strnlen(const char *s, size_t len) {
     size_t cnt = 0;
     while (cnt < len && *s ++ != '\0') {
         cnt ++;
     }
     return cnt;
+}
+
+/* *
+ * strcat - appends a copy of the @src string to the @dst string. The terminating null
+ * character in @dst is overwritten by the first character of @src, and a new null-character
+ * is appended at the end of the new string formed by the concatenation of both in @dst.
+ * @dst:    pointer to the @dst array, which should be large enough to contain the concatenated
+ *          resulting string.
+ * @src:    string to be appended, this should not overlap @dst
+ * */
+char *
+strcat(char *dst, const char *src) {
+    return strcpy(dst + strlen(dst), src);
 }
 
 /* *
@@ -52,7 +65,7 @@ libs_strnlen(const char *s, size_t len) {
  * should not overlap in memory with @src.
  * */
 char *
-libs_strcpy(char *dst, const char *src) {
+strcpy(char *dst, const char *src) {
 #ifdef __HAVE_ARCH_STRCPY
     return __strcpy(dst, src);
 #else
@@ -74,7 +87,7 @@ libs_strcpy(char *dst, const char *src) {
  * The return value is @dst
  * */
 char *
-libs_strncpy(char *dst, const char *src, size_t len) {
+strncpy(char *dst, const char *src, size_t len) {
     char *p = dst;
     while (len > 0) {
         if ((*p = *src) != '\0') {
@@ -87,8 +100,8 @@ libs_strncpy(char *dst, const char *src, size_t len) {
 
 /* *
  * strcmp - compares the string @s1 and @s2
- * @s1:        string to be compared
- * @s2:        string to be compared
+ * @s1:     string to be compared
+ * @s2:     string to be compared
  *
  * This function starts comparing the first character of each string. If
  * they are equal to each other, it continues with the following pairs until
@@ -101,7 +114,7 @@ libs_strncpy(char *dst, const char *src, size_t len) {
  * - And a value less than zero indicates the opposite.
  * */
 int
-libs_strcmp(const char *s1, const char *s2) {
+strcmp(const char *s1, const char *s2) {
 #ifdef __HAVE_ARCH_STRCMP
     return __strcmp(s1, s2);
 #else
@@ -114,9 +127,9 @@ libs_strcmp(const char *s1, const char *s2) {
 
 /* *
  * strncmp - compares up to @n characters of the string @s1 to those of the string @s2
- * @s1:        string to be compared
- * @s2:        string to be compared
- * @n:        maximum number of characters to compare
+ * @s1:     string to be compared
+ * @s2:     string to be compared
+ * @n:      maximum number of characters to compare
  *
  * This function starts comparing the first character of each string. If
  * they are equal to each other, it continues with the following pairs until
@@ -124,7 +137,7 @@ libs_strcmp(const char *s1, const char *s2) {
  * until @n characters match in both strings, whichever happens first.
  * */
 int
-libs_strncmp(const char *s1, const char *s2, size_t n) {
+strncmp(const char *s1, const char *s2, size_t n) {
     while (n > 0 && *s1 != '\0' && *s1 == *s2) {
         n --, s1 ++, s2 ++;
     }
@@ -133,14 +146,14 @@ libs_strncmp(const char *s1, const char *s2, size_t n) {
 
 /* *
  * strchr - locates first occurrence of character in string
- * @s:        the input string
- * @c:        character to be located
+ * @s:      the input string
+ * @c:      character to be located
  *
  * The strchr() function returns a pointer to the first occurrence of
  * character in @s. If the value is not found, the function returns 'NULL'.
  * */
 char *
-libs_strchr(const char *s, char c) {
+strchr(const char *s, char c) {
     while (*s != '\0') {
         if (*s == c) {
             return (char *)s;
@@ -152,15 +165,15 @@ libs_strchr(const char *s, char c) {
 
 /* *
  * strfind - locates first occurrence of character in string
- * @s:        the input string
- * @c:        character to be located
+ * @s:      the input string
+ * @c:      character to be located
  *
  * The strfind() function is like strchr() except that if @c is
  * not found in @s, then it returns a pointer to the null byte at the
  * end of @s, rather than 'NULL'.
  * */
 char *
-libs_strfind(const char *s, char c) {
+strfind(const char *s, char c) {
     while (*s != '\0') {
         if (*s == c) {
             break;
@@ -172,11 +185,11 @@ libs_strfind(const char *s, char c) {
 
 /* *
  * strtol - converts string to long integer
- * @s:        the input string that contains the representation of an integer number
- * @endptr:    reference to an object of type char *, whose value is set by the
- *             function to the next character in @s after the numerical value. This
- *             parameter can also be a null pointer, in which case it is not used.
- * @base:    x
+ * @s:      the input string that contains the representation of an integer number
+ * @endptr: reference to an object of type char *, whose value is set by the
+ *          function to the next character in @s after the numerical value. This
+ *          parameter can also be a null pointer, in which case it is not used.
+ * @base:   x
  *
  * The function first discards as many whitespace characters as necessary until
  * the first non-whitespace character is found. Then, starting from this character,
@@ -201,7 +214,7 @@ libs_strfind(const char *s, char c) {
  * The strtol() function returns the converted integral number as a long int value.
  * */
 long
-libs_strtol(const char *s, char **endptr, int base) {
+strtol(const char *s, char **endptr, int base) {
     int neg = 0;
     long val = 0;
 
@@ -261,14 +274,14 @@ libs_strtol(const char *s, char **endptr, int base) {
 /* *
  * memset - sets the first @n bytes of the memory area pointed by @s
  * to the specified value @c.
- * @s:        pointer the the memory area to fill
- * @c:        value to set
- * @n:        number of bytes to be set to the value
+ * @s:      pointer the the memory area to fill
+ * @c:      value to set
+ * @n:      number of bytes to be set to the value
  *
  * The memset() function returns @s.
  * */
 void *
-libs_memset(void *s, char c, size_t n) {
+memset(void *s, char c, size_t n) {
 #ifdef __HAVE_ARCH_MEMSET
     return __memset(s, c, n);
 #else
@@ -283,14 +296,14 @@ libs_memset(void *s, char c, size_t n) {
 /* *
  * memmove - copies the values of @n bytes from the location pointed by @src to
  * the memory area pointed by @dst. @src and @dst are allowed to overlap.
- * @dst        pointer to the destination array where the content is to be copied
- * @src        pointer to the source of data to by copied
- * @n:        number of bytes to copy
+ * @dst     pointer to the destination array where the content is to be copied
+ * @src     pointer to the source of data to by copied
+ * @n:      number of bytes to copy
  *
  * The memmove() function returns @dst.
  * */
 void *
-libs_memmove(void *dst, const void *src, size_t n) {
+memmove(void *dst, const void *src, size_t n) {
 #ifdef __HAVE_ARCH_MEMMOVE
     return __memmove(dst, src, n);
 #else
@@ -313,9 +326,9 @@ libs_memmove(void *dst, const void *src, size_t n) {
 /* *
  * memcpy - copies the value of @n bytes from the location pointed by @src to
  * the memory area pointed by @dst.
- * @dst        pointer to the destination array where the content is to be copied
- * @src        pointer to the source of data to by copied
- * @n:        number of bytes to copy
+ * @dst     pointer to the destination array where the content is to be copied
+ * @src     pointer to the source of data to by copied
+ * @n:      number of bytes to copy
  *
  * The memcpy() returns @dst.
  *
@@ -325,7 +338,7 @@ libs_memmove(void *dst, const void *src, size_t n) {
  * (for overlapping memory area, memmove is a safer approach).
  * */
 void *
-libs_memcpy(void *dst, const void *src, size_t n) {
+memcpy(void *dst, const void *src, size_t n) {
 #ifdef __HAVE_ARCH_MEMCPY
     return __memcpy(dst, src, n);
 #else
@@ -340,9 +353,9 @@ libs_memcpy(void *dst, const void *src, size_t n) {
 
 /* *
  * memcmp - compares two blocks of memory
- * @v1:        pointer to block of memory
- * @v2:        pointer to block of memory
- * @n:        number of bytes to compare
+ * @v1:     pointer to block of memory
+ * @v2:     pointer to block of memory
+ * @n:      number of bytes to compare
  *
  * The memcmp() functions returns an integral value indicating the
  * relationship between the content of the memory blocks:
@@ -353,7 +366,7 @@ libs_memcpy(void *dst, const void *src, size_t n) {
  * - And a value less than zero indicates the opposite.
  * */
 int
-libs_memcmp(const void *v1, const void *v2, size_t n) {
+memcmp(const void *v1, const void *v2, size_t n) {
     const char *s1 = (const char *)v1;
     const char *s2 = (const char *)v2;
     while (n -- > 0) {

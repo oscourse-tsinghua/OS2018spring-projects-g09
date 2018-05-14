@@ -4,6 +4,7 @@
 #include <machine/memlayout.h>
 #include <hvm.h>
 #include <xapic.h>
+#include <libs/riscv.h>
 
 static struct gate_desc idt[256] = {{0}};
 
@@ -13,12 +14,25 @@ static struct pseudo_desc idt_desc = {
 
 void trap_init(void)
 {
+    #if 0//Origin
     size_t i;
     extern void *trap_vectors[];
 
     for (i = 0; i < countof(idt); ++i)
         set_gate_desc(&idt[i], 0, GDT_CS, trap_vectors[i], KERNEL_PL);
     lidt(&idt_desc);
+    #endif
+    extern void __alltraps(void);
+    /* Set sscratch register to 0, indicating to exception vector that we are
+     * presently executing in the kernel */
+    write_csr(sscratch, 0);
+    /* Set the exception vector address */
+    write_csr(stvec, &__alltraps);
+    /* Allow kernel to access user memory */
+    set_csr(sstatus, SSTATUS_SUM);
+    /* Allow keyboard interrupt */
+    set_csr(sie, MIP_SSIP);
+
 }
 
 void trap(struct trap_frame *tf, uint8_t nr)

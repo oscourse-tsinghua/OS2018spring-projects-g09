@@ -40,8 +40,8 @@ void main(void)
     libs_cprintf("Hello World\n");
     //while(1);
 	print_config();
-	while(1);
     arch_init();
+	while(1);
     vm_init();
     user_init(INITPID);
 
@@ -266,19 +266,31 @@ static struct pci_driver drivers[] = {
 static void arch_init(void)
 {
     size_t i;
-
+    libs_cprintf("porte9_init\n");
     porte9_init();
+    libs_cprintf("cga_init %x\n",pa2kva(CGA_START));
     cga_init(pa2kva(CGA_START));
+    libs_cprintf("tsc_init\n");
     tsc_init();
+    libs_cprintf("trap_init\n");
     trap_init();
+    libs_cprintf("cpuid_init\n");
     cpuid_init();
+    libs_cprintf("acpi_init\n");
     acpi_init();
+    libs_cprintf("pmap_init\n");
     pmap_init();
+    libs_cprintf("mtrr_init\n");
     mtrr_init();
+    libs_cprintf("xapic_init\n");
     xapic_init();
+    libs_cprintf("fpu_init\n");
     fpu_init();
+    libs_cprintf("hvm_init\n");
     hvm_init();
+    libs_cprintf("iommu_init\n");
     iommu_init();
+    libs_cprintf("iommu_early_set_dev_region %x %x\n",kva2pa(dmapages), kva2pa(dmapages + NDMAPAGE));
     iommu_early_set_dev_region(kva2pa(dmapages), kva2pa(dmapages + NDMAPAGE));
 
     /* allow access to some ports in user space */

@@ -1,5 +1,6 @@
 #include <uapi/machine/cpufunc.h>
 #include <time.h>
+#include <libs/riscv.h>
 
 #define IO_TIMER1 0x040 /* 8253 Timer #1 */
 #define TIMER_FREQ 1193182
@@ -12,9 +13,9 @@
 #define TIMER_STAT0 (TIMER_STAT | 0x2) /* status mode counter 0 */
 
 static uint64_t tsc_mhz;
-
 void tsc_init(void)
 {
+    #if 0///Unclear
     uint64_t xticks, start, end;
 
     /* PIT countdown from 2^16 - 1 */
@@ -36,6 +37,8 @@ void tsc_init(void)
     end = rdtsc();
 
     tsc_mhz = ((end - start) * 10) / ((xticks * 10000000) / TIMER_FREQ);
+    #endif
+    tsc_mhz=3598;
     pr_info("tsc: %" PRIu64 " MHz\n", tsc_mhz);
 }
 

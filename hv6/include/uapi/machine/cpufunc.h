@@ -142,10 +142,12 @@ static inline uint64_t rcr2(void)
     return reg_read(cr2);
 }
 
+#if 0//Implemented in riscv.h
 static inline void lcr3(uint64_t val)
 {
     reg_write(cr3, val);
 }
+#endif
 
 static inline uint64_t rcr3(void)
 {
