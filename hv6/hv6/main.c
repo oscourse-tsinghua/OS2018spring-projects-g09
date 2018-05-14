@@ -275,9 +275,9 @@ static void arch_init(void)
     libs_cprintf("trap_init\n");
     trap_init();
     libs_cprintf("cpuid_init\n");
-    cpuid_init();
+    ///cpuid_init();//unknown
     libs_cprintf("acpi_init\n");
-    acpi_init();
+    ///acpi_init();//unknown
     libs_cprintf("pmap_init\n");
     pmap_init();
     libs_cprintf("mtrr_init\n");

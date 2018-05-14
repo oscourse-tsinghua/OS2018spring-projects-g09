@@ -5,6 +5,8 @@ static uint32_t features[CPUID_LEAF_MAX];
 
 void cpuid_init(void)
 {
+    //libs_cprintf("error in cpuid_init");
+    while(1);///unknown
     uint32_t regs[4], highest;
 
     cpuid(0, regs);
@@ -40,5 +42,7 @@ void cpuid_init(void)
 
 bool cpuid_has(int bit)
 {
+    //libs_cprintf("error in cpuid_has");
+    while(1);///unknown
     return !!(features[bit / 32U] & (1U << (bit % 32U)));
 }

@@ -38,7 +38,7 @@ void tsc_init(void)
 
     tsc_mhz = ((end - start) * 10) / ((xticks * 10000000) / TIMER_FREQ);
     #endif
-    tsc_mhz=3598;
+    tsc_mhz=3598;//TODO
     pr_info("tsc: %" PRIu64 " MHz\n", tsc_mhz);
 }
 
