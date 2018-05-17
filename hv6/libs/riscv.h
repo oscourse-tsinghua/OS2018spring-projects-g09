@@ -912,6 +912,7 @@ rcr3() {
 #define CAUSE_SUPERVISOR_ECALL 0x9
 #define CAUSE_HYPERVISOR_ECALL 0xa
 #define CAUSE_MACHINE_ECALL 0xb
+#define CSR_OS_DEBUGMODE 0xfff //Self-defined RISCVEMU only(for DEBUG)
 #endif
 #ifdef DECLARE_INSN
 DECLARE_INSN(beq, MATCH_BEQ, MASK_BEQ)

@@ -21,6 +21,7 @@
 #include "vm.h"
 #include "invariants.h"
 #include <libs/stdio.h>
+#include <libs/riscv.h>
 
 static void vm_init(void);
 static void user_init(pid_t);
@@ -44,6 +45,7 @@ void main(void)
     libs_cprintf("vm_init:\n");
     vm_init();
     libs_cprintf("user_init:\n");
+    write_csr(dcsr,1);//open RISCVEMU debug
     user_init(INITPID);
 
     print_config();

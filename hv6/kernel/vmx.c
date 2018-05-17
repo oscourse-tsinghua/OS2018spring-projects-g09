@@ -9,6 +9,7 @@
 #include "types.h"
 #include "proc.h"
 #include "vmx.h"
+#include <libs/riscv.h>
 
 static uint32_t pinbased_ones_mask = PINBASED_EXTINT_EXITING
 #if ENABLED(CONFIG_PREEMPT)

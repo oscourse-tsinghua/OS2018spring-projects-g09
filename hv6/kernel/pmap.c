@@ -5,6 +5,7 @@
 #include <multiboot.h>
 #include <string.h>
 #include <symtable.h>
+#include <libs/riscv.h>
 
 static const char *e820_type(uint32_t type)
 {

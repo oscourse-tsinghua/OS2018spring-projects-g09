@@ -56,6 +56,8 @@
 //#define DUMP_EXCEPTIONS
 //#define DUMP_CSR
 //#define CONFIG_LOGFILE
+#define CSR_OS_DEBUGMODE 0x7b0
+static int OS_DEBUGMODE = 0;  //Self-defined CSR RISCVEMU only(for DEBUG)
 
 #if defined(EMSCRIPTEN)
 #define USE_GLOBAL_STATE
@@ -957,11 +959,15 @@ static int csr_read(RISCVCPUState *s, target_ulong *pval, uint32_t csr,
 {
     target_ulong val;
 
+    if(csr == CSR_OS_DEBUGMODE)
+        goto dontCheck;
+
     if (((csr & 0xc00) == 0xc00) && will_write)
         return -1; /* read-only CSR */
     if (s->priv < ((csr >> 8) & 3))
         return -1; /* not enough priviledge */
     
+    dontCheck:
     switch(csr) {
 #if FLEN > 0
     case 0x001: /* fflags */
@@ -1092,6 +1098,9 @@ static int csr_read(RISCVCPUState *s, target_ulong *pval, uint32_t csr,
         break;
     case 0xf14:
         val = s->mhartid;
+        break;
+    case CSR_OS_DEBUGMODE: //Debug control and status register.
+        val=OS_DEBUGMODE;
         break;
     default:
     invalid_csr:
@@ -1260,6 +1269,10 @@ static int csr_write(RISCVCPUState *s, uint32_t csr, target_ulong val)
     case 0x344:
         mask = MIP_SSIP | MIP_STIP;
         s->mip = (s->mip & ~mask) | (val & mask);
+        break;
+    case CSR_OS_DEBUGMODE: //Debug control and status register
+        OS_DEBUGMODE = val;
+        printf("RISCVEMU  OS_DEBUGMODE=%d now\n",val);
         break;
     default:
 #ifdef DUMP_INVALID_CSR
