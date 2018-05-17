@@ -51,9 +51,9 @@
 
 //#define DUMP_INVALID_MEM_ACCESS
 //#define DUMP_MMU_EXCEPTIONS
-//#define DUMP_INTERRUPTS
+#define DUMP_INTERRUPTS
 //#define DUMP_INVALID_CSR
-//#define DUMP_EXCEPTIONS
+#define DUMP_EXCEPTIONS
 //#define DUMP_CSR
 //#define CONFIG_LOGFILE
 #define CSR_OS_DEBUGMODE 0x7b0
@@ -163,6 +163,7 @@ typedef uint128_t mem_uint_t;
 
 /* mstatus CSR */
 
+#define MSTATUS_UPIE_SHIFT 4
 #define MSTATUS_SPIE_SHIFT 5
 #define MSTATUS_MPIE_SHIFT 7
 #define MSTATUS_SPP_SHIFT 8
@@ -175,7 +176,7 @@ typedef uint128_t mem_uint_t;
 #define MSTATUS_SIE (1 << 1)
 #define MSTATUS_HIE (1 << 2)
 #define MSTATUS_MIE (1 << 3)
-#define MSTATUS_UPIE (1 << 4)
+#define MSTATUS_UPIE (1 << MSTATUS_UPIE_SHIFT)
 #define MSTATUS_SPIE (1 << MSTATUS_SPIE_SHIFT)
 #define MSTATUS_HPIE (1 << 6)
 #define MSTATUS_MPIE (1 << MSTATUS_MPIE_SHIFT)
@@ -247,6 +248,15 @@ struct RISCVCPUState {
     target_ulong sepc;
     target_ulong scause;
     target_ulong stval;
+    uint32_t sedeleg;
+    uint32_t sideleg;
+
+    target_ulong utvec;
+    target_ulong uscratch;
+    target_ulong uepc;
+    target_ulong ucause;
+    target_ulong utval;
+
 #if MAX_XLEN == 32
     uint32_t satp;
 #else
@@ -880,6 +890,16 @@ void riscv_cpu_flush_tlb_write_range_ram(RISCVCPUState *s,
 }
 
 
+#define USTATUS_MASK0 (MSTATUS_UIE  |       \
+                      MSTATUS_UPIE |     \
+                      MSTATUS_FS | MSTATUS_XS | \
+                      MSTATUS_SUM | MSTATUS_MXR)
+#if MAX_XLEN >= 64
+#define USTATUS_MASK (USTATUS_MASK0 | MSTATUS_UXL_MASK)
+#else
+#define USTATUS_MASK USTATUS_MASK0
+#endif
+
 #define SSTATUS_MASK0 (MSTATUS_UIE | MSTATUS_SIE |       \
                       MSTATUS_UPIE | MSTATUS_SPIE |     \
                       MSTATUS_SPP | \
@@ -1102,6 +1122,27 @@ static int csr_read(RISCVCPUState *s, target_ulong *pval, uint32_t csr,
     case CSR_OS_DEBUGMODE: //Debug control and status register.
         val=OS_DEBUGMODE;
         break;
+    case 0x102: //sedeleg
+        val = s->sedeleg;
+        break;
+    case 0x103: //sideleg
+        val = s->sideleg;
+        break;
+    case 0x005: //utvec
+        val = s->utvec;
+        break;
+    case 0x040: //uscratch
+        val = s->uscratch;
+        break;
+    case 0x041: //uepc
+        val = s->uepc;
+        break;
+    case 0x042: //ucause
+        val = s->ucause;
+        break;
+    case 0x044: //utval
+        val = s->utval;
+        break;
     default:
     invalid_csr:
 #ifdef DUMP_INVALID_CSR
@@ -1172,7 +1213,7 @@ static int csr_write(RISCVCPUState *s, uint32_t csr, target_ulong val)
         s->mie = (s->mie & ~mask) | (val & mask);
         break;
     case 0x105:
-        s->stvec = val & ~3;
+        s->stvec = val;
         break;
     case 0x106:
         s->scounteren = val & COUNTEREN_MASK;
@@ -1241,7 +1282,7 @@ static int csr_write(RISCVCPUState *s, uint32_t csr, target_ulong val)
         s->medeleg = (s->medeleg & ~mask) | (val & mask);
         break;
     case 0x303:
-        mask = MIP_SSIP | MIP_STIP | MIP_SEIP;
+        mask = MIP_SSIP | MIP_STIP | MIP_SEIP | MIP_USIP | MIP_UTIP | MIP_UEIP;
         s->mideleg = (s->mideleg & ~mask) | (val & mask);
         break;
     case 0x304:
@@ -1249,7 +1290,7 @@ static int csr_write(RISCVCPUState *s, uint32_t csr, target_ulong val)
         s->mie = (s->mie & ~mask) | (val & mask);
         break;
     case 0x305:
-        s->mtvec = val & ~3;
+        s->mtvec = val;
         break;
     case 0x306:
         s->mcounteren = val & COUNTEREN_MASK;
@@ -1274,6 +1315,28 @@ static int csr_write(RISCVCPUState *s, uint32_t csr, target_ulong val)
         OS_DEBUGMODE = val;
         printf("RISCVEMU  OS_DEBUGMODE=%d now\n",val);
         break;
+    case 0x102: //sedeleg
+        s->sedeleg = val;
+        break;
+    case 0x103: //sideleg
+        s->sideleg = val;
+        break;
+    case 0x005: //utvec
+        s->utvec = val;
+        break;
+    case 0x040: //uscratch
+        s->uscratch = val;
+        break;
+    case 0x041: //uepc
+        s->uepc = val;
+        break;
+    case 0x042: //ucause
+        s->ucause = val;
+        break;
+    case 0x044: //utval
+        s->utval = val;
+        break;
+        
     default:
 #ifdef DUMP_INVALID_CSR
         printf("csr_write: invalid CSR=0x%x\n", csr);
@@ -1307,7 +1370,7 @@ static void set_priv(RISCVCPUState *s, int priv)
 static void raise_exception2(RISCVCPUState *s, uint32_t cause,
                              target_ulong tval)
 {
-    BOOL deleg;
+    BOOL mdeleg,sdeleg;
     target_ulong causel;
     
 #if defined(DUMP_EXCEPTIONS) || defined(DUMP_MMU_EXCEPTIONS) || defined(DUMP_INTERRUPTS)
@@ -1349,18 +1412,39 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
     if (s->priv <= PRV_S) {
         /* delegate the exception to the supervisor priviledge */
         if (isInterrupt)
-            deleg = (s->mideleg >> (cause & (MAX_XLEN - 1))) & 1;
+            mdeleg = (s->mideleg >> (cause & (MAX_XLEN - 1))) & 1;
         else
-            deleg = (s->medeleg >> cause) & 1;
+            mdeleg = (s->medeleg >> cause) & 1;
     } else {
-        deleg = 0;
+        mdeleg = 0;
+    }
+    if (s->priv <= PRV_U) {
+        /* delegate the exception to the user priviledge */
+        if (isInterrupt)
+            sdeleg = (s->sideleg >> (cause & (MAX_XLEN - 1))) & 1;
+        else
+            sdeleg = (s->sedeleg >> cause) & 1;
+    } else {
+        mdeleg = 0;
     }
     
     causel = cause & 0x7fffffff;
     if (isInterrupt)
         causel |= (target_ulong)1 << (s->cur_xlen - 1);
     
-    if (deleg) {
+    if (sdeleg && mdeleg) {
+        s->ucause = causel;
+        s->uepc = s->pc;
+        s->utval = tval;
+        s->mstatus = (s->mstatus & ~MSTATUS_UPIE) |
+            (((s->mstatus >> s->priv) & 1) << MSTATUS_UPIE_SHIFT);
+        s->mstatus &= ~MSTATUS_UIE;
+        set_priv(s, PRV_U);
+        if(s->utvec&3==0 || !isInterrupt)//Direct
+            s->pc = s->utvec&~3;
+        else if(s->utvec&3==1)//Vectored
+            s->pc = (s->stvec&~3)+4*causel;
+    } else if (mdeleg) {
         s->scause = causel;
         s->sepc = s->pc;
         s->stval = tval;
@@ -1394,6 +1478,19 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
 static void raise_exception(RISCVCPUState *s, uint32_t cause)
 {
     raise_exception2(s, cause, 0);
+}
+
+static void handle_uret(RISCVCPUState *s)
+{
+    int upp = 0, upie;
+    /* set the IE state to previous IE state */
+    upie = (s->mstatus >> MSTATUS_UPIE_SHIFT) & 1;
+    s->mstatus = (s->mstatus & ~(1 << upp)) |
+        (upie << upp);
+    /* set UPIE to 1 */
+    s->mstatus |= MSTATUS_UPIE;
+    set_priv(s, upp);
+    s->pc = s->uepc;
 }
 
 static void handle_sret(RISCVCPUState *s)
