@@ -1345,9 +1345,10 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
     }
 #endif
 
+    uint8_t isInterrupt = (cause & CAUSE_INTERRUPT)>0;
     if (s->priv <= PRV_S) {
         /* delegate the exception to the supervisor priviledge */
-        if (cause & CAUSE_INTERRUPT)
+        if (isInterrupt)
             deleg = (s->mideleg >> (cause & (MAX_XLEN - 1))) & 1;
         else
             deleg = (s->medeleg >> cause) & 1;
@@ -1356,7 +1357,7 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
     }
     
     causel = cause & 0x7fffffff;
-    if (cause & CAUSE_INTERRUPT)
+    if (isInterrupt)
         causel |= (target_ulong)1 << (s->cur_xlen - 1);
     
     if (deleg) {
@@ -1369,7 +1370,10 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
             (s->priv << MSTATUS_SPP_SHIFT);
         s->mstatus &= ~MSTATUS_SIE;
         set_priv(s, PRV_S);
-        s->pc = s->stvec;
+        if(s->stvec&3==0 || !isInterrupt)//Direct
+            s->pc = s->stvec&~3;
+        else if(s->stvec&3==1)//Vectored
+            s->pc = (s->stvec&~3)+4*causel;
     } else {
         s->mcause = causel;
         s->mepc = s->pc;
@@ -1380,7 +1384,10 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
             (s->priv << MSTATUS_MPP_SHIFT);
         s->mstatus &= ~MSTATUS_MIE;
         set_priv(s, PRV_M);
-        s->pc = s->mtvec;
+        if(s->mtvec&3==0 || !isInterrupt)//Direct
+            s->pc = s->mtvec&~3;
+        else if(s->mtvec&3==1)//Vectored
+            s->pc = (s->mtvec&~3)+4*causel;
     }
 }
 
