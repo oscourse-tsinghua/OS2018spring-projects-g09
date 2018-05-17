@@ -11,6 +11,8 @@ static int seoi;
 
 static uint32_t xapic_read32(uint32_t reg)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_read32");
+    while(1);
     if (x2apic_mode)
         return rdmsr(MSR_APIC_000 + reg);
     return mmio_read32(xapic_base + reg * LAPIC_MEM_MUL);
@@ -18,6 +20,8 @@ static uint32_t xapic_read32(uint32_t reg)
 
 static void xapic_write32(uint32_t reg, uint32_t val)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_write32");
+    while(1);
     if (x2apic_mode)
         wrmsr(MSR_APIC_000 + reg, val);
     return mmio_write32(xapic_base + reg * LAPIC_MEM_MUL, val);
@@ -25,6 +29,8 @@ static void xapic_write32(uint32_t reg, uint32_t val)
 
 static void xapic_write_icr(uint64_t val)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_write_icr");
+    while(1);
     uint32_t lo, hi;
 
     if (x2apic_mode)
@@ -38,12 +44,16 @@ static void xapic_write_icr(uint64_t val)
 
 static void xapic_wait(void)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_wait");
+    while(1);
     while (xapic_read32(LAPIC_ICR_LO) & APIC_DELSTAT_PEND)
         ;
 }
 
 void xapic_init(void)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_init");
+    while(1);
     uint64_t reg;
     bool bsp;
     uint32_t ver;
@@ -119,6 +129,8 @@ void xapic_init(void)
 
 uint32_t xapic_id(void)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_id");
+    while(1);
     uint32_t id = xapic_read32(LAPIC_ID);
 
     return x2apic_mode ? id : (id >> 24);
@@ -126,11 +138,15 @@ uint32_t xapic_id(void)
 
 void xapic_eoi(void)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_eoi");
+    while(1);
     xapic_write32(LAPIC_EOI, 0);
 }
 
 void xapic_seoi(uint8_t vec)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_seoi");
+    while(1);
     if (!seoi)
         return;
 
@@ -139,6 +155,8 @@ void xapic_seoi(uint8_t vec)
 
 void xapic_ier_enable(uint8_t vec)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_ier_enable");
+    while(1);
     uint32_t reg, val;
 
     if (!seoi)
@@ -151,6 +169,8 @@ void xapic_ier_enable(uint8_t vec)
 
 void xapic_ier_disable(uint8_t vec)
 {
+    libs_cprintf("Migration error : Should not arrive xapic_ier_disable");
+    while(1);
     uint32_t reg, val;
 
     if (!seoi)

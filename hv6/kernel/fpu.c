@@ -7,7 +7,6 @@ void fpu_init(void)
 {
 #if ENABLED(CONFIG_FPU)
     register_t cr0, cr4;
-
     /* check xsave */
     if (!cpuid_has(CPUID_FEATURE_XSAVE))
         panic("no xsave support");

@@ -38,17 +38,20 @@ void main(void)
 {
     libs_cprintf("%s\n\n", "hv6-riscv os is loading ...\n");
     libs_cprintf("Hello World\n");
-    //while(1);
 	print_config();
+    libs_cprintf("arch_init:\n");
     arch_init();
-	while(1);
+    libs_cprintf("vm_init:\n");
     vm_init();
+    libs_cprintf("user_init:\n");
     user_init(INITPID);
 
     print_config();
     print_version();
     check_invariants();
 
+    libs_cprintf("run_current:\n");
+	while(1);
     run_current();
     panic(NULL);
 }
@@ -82,6 +85,8 @@ static void vm_init(void)
     FREELIST_INIT(page_desc_table, link, 0);
     for (i = 1; i < NPAGE; ++i)
         FREELIST_ADD_TAIL(page_desc_table, link, i, 0);
+
+    ///write_csr(satp, (0x8000000000000000) | (boot_cr3 >> RISCV_PGSHIFT));///enable_paging
 
 #if 0
 	size_t i;
@@ -155,9 +160,11 @@ static void user_init(pid_t pid)
     page_table_root = boot_alloc();
     stack = boot_alloc();
     hvm = boot_alloc();
+    libs_cprintf("user_init：alloc_proc(pid, page_table_root, stack, hvm)\n");
     r = alloc_proc(pid, page_table_root, stack, hvm);
     assert(r == 0, "alloc_proc");
 
+    libs_cprintf("user_init：load_elf(pid, _binary_init_start)\n");
     /* load & allocate pages for init & ulib */
     entry = load_elf(pid, _binary_init_start);
     load_elf(pid, _binary_ulib_start);
@@ -279,32 +286,37 @@ static void arch_init(void)
     libs_cprintf("acpi_init\n");
     ///acpi_init();//unknown
     libs_cprintf("pmap_init\n");
-    pmap_init();
+    ///pmap_init();//unknown
     libs_cprintf("mtrr_init\n");
-    mtrr_init();
+    ///mtrr_init();//useless
     libs_cprintf("xapic_init\n");
-    xapic_init();
+    ///xapic_init();//useless
     libs_cprintf("fpu_init\n");
-    fpu_init();
+    ///fpu_init();//temporarily disabled
     libs_cprintf("hvm_init\n");
-    hvm_init();
+    ///hvm_init();//useless
     libs_cprintf("iommu_init\n");
     iommu_init();
     libs_cprintf("iommu_early_set_dev_region %x %x\n",kva2pa(dmapages), kva2pa(dmapages + NDMAPAGE));
     iommu_early_set_dev_region(kva2pa(dmapages), kva2pa(dmapages + NDMAPAGE));
 
     /* allow access to some ports in user space */
+    libs_cprintf("reserve_ports\n");
     reserve_ports(0, SZ_64K);
+    libs_cprintf("allow_ports\n");
     allow_ports(PORT_COM1, 6);
     allow_ports(PORT_COM2, 6);
     allow_port(PORT_KBD_DATA);
     allow_port(PORT_KBD_STATUS);
     allow_ports(PORT_CRT, 2);
 
+    libs_cprintf("reserve_vectors\n");
     /* reserve vectors: 0-31 */
     reserve_vectors(0, 32);
 
+    libs_cprintf("set pci callbacks\n");
     /* set pci callbacks */
+    #if 0///
     pci_register_func = device_add;
 
     for (i = 0; i < countof(drivers); ++i)
@@ -318,6 +330,7 @@ static void arch_init(void)
     hvm_extintr = extintr;
     /* set triple fault handler */
     hvm_fault = fault;
+    #endif
 
     /*
      * For syscall:
@@ -325,14 +338,15 @@ static void arch_init(void)
      *   ds: cs + 8
      * No need to set sysret as we just use the regular ret.
      */
-    wrmsr(MSR_STAR, (uint64_t)GDT_CS << 32);
-    wrmsr(MSR_LSTAR, USYSCALL_START);
+    ///wrmsr(MSR_STAR, (uint64_t)GDT_CS << 32);
+    ///wrmsr(MSR_LSTAR, USYSCALL_START);
     /* no need to mask anything */
-    wrmsr(MSR_SFMASK, 0);
+    ///wrmsr(MSR_SFMASK, 0);
 
     /* check fsgsbase */
-    if (!cpuid_has(CPUID_FEATURE_FSGSBASE))
-        panic("no fsgsbase support");
+    ///if (!cpuid_has(CPUID_FEATURE_FSGSBASE))
+    ///    panic("no fsgsbase support");
+    libs_cprintf("arch_init end.\n");
 }
 
 static void arch_user_init(pid_t pid)

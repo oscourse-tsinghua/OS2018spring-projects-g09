@@ -233,8 +233,14 @@
 
 static inline void
 lcr3(unsigned int cr3) {
-    write_csr(sptbr, cr3 >> RISCV_PGSHIFT);
+    write_csr(sptbr, cr3);
 }
+
+static inline uint64_t
+rcr3() {
+    return read_csr(sptbr);
+}
+
 
 #endif
 
@@ -746,6 +752,7 @@ lcr3(unsigned int cr3) {
 #define CSR_SBADADDR 0x143
 #define CSR_SIP 0x144
 #define CSR_SPTBR 0x180
+#define CSR_SATP 0x180
 #define CSR_MSTATUS 0x300
 #define CSR_MISA 0x301
 #define CSR_MEDELEG 0x302

@@ -38,6 +38,7 @@ static void stub_iommu_early_set_dev_region(physaddr_t start, physaddr_t end)
 
 void iommu_init(void)
 {
+    #if 0///
     acpi_status status;
     struct acpi_table_header *header;
 
@@ -48,7 +49,7 @@ void iommu_init(void)
     status = acpi_get_table(ACPI_SIG_IVRS, 0, &header);
     if (ACPI_SUCCESS(status))
         return amd_iommu_init();
-
+    #endif
     pr_warn("iommu: DMAR/IVRS not found\n");
     iommu_reset_dev_root = stub_iommu_reset_dev_root;
     iommu_set_dev_root = stub_iommu_set_dev_root;
