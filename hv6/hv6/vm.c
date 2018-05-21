@@ -157,18 +157,18 @@ static int alloc_page_table_page(pid_t pid, pn_t from_pn, size_t index, pn_t to_
 
 int sys_alloc_pdpt(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm)
 {
-    return alloc_page_table_page(pid, from, index, to, perm, PAGE_TYPE_X86_PML4,
+    return alloc_page_table_page(pid, from, index, to, perm & ～PTE_XWR_MASK, PAGE_TYPE_X86_PML4,
                                  PAGE_TYPE_X86_PDPT);
 }
 
 int sys_alloc_pd(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm)
 {
-    return alloc_page_table_page(pid, from, index, to, perm, PAGE_TYPE_X86_PDPT, PAGE_TYPE_X86_PD);
+    return alloc_page_table_page(pid, from, index, to, perm & ～PTE_XWR_MASK, PAGE_TYPE_X86_PDPT, PAGE_TYPE_X86_PD);
 }
 
 int sys_alloc_pt(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm)
 {
-    return alloc_page_table_page(pid, from, index, to, perm, PAGE_TYPE_X86_PD, PAGE_TYPE_X86_PT);
+    return alloc_page_table_page(pid, from, index, to, perm & ～PTE_XWR_MASK, PAGE_TYPE_X86_PD, PAGE_TYPE_X86_PT);
 }
 
 int sys_alloc_frame(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm)
