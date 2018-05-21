@@ -1,5 +1,6 @@
 #include <uapi/machine/trap.h>
 #include <uapi/elf.h>
+#include <libs/riscv.h>
 #include "user.h"
 
 /* pfn of the first page */

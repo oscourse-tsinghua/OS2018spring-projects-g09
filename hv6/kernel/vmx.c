@@ -282,10 +282,12 @@ static void vmx_set_vpid(void *vmcs, pid_t pid)
 
 static void vmx_invalidate_tlb(pid_t pid)
 {
-    vpid_t vpid;
+    asm("sfence.vma");
+    /// invalid tlb
+    // vpid_t vpid;
 
-    vpid = pid_vpid(pid);
-    invvpid(INVVPID_SINGLE_CONTEXT, 0, vpid);
+    // vpid = pid_vpid(pid);
+    // invvpid(INVVPID_SINGLE_CONTEXT, 0, vpid);
 }
 
 static void vmx_copy(void *dst, void *src, pid_t pid)

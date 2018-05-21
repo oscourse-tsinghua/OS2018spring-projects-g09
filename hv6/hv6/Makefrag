@@ -96,7 +96,7 @@ $(HV6_KERNEL_OBJS): CFLAGS += -fno-stack-protector -I kernel -I hv6
 $(HV6_LLS): CFLAGS += -I kernel
 
 # include user specific makefile rules
-#include hv6/user/Makefrag
+include hv6/user/Makefrag
 
 $(O)/hv6/%.asm: $(O)/hv6/%
 	$(QUIET_GEN)$(OBJDUMP) -S $< > $@
@@ -105,7 +105,7 @@ $(O)/hv6/%.asm: $(O)/hv6/%
 $(HV6_LINUX_UPROGS):
 	@:
 
-hv6: $(HV6_BIN) $(HV6_ASM) #$(O)/hv6/ulib.asm $(O)/hv6/fs.img
+hv6: $(HV6_BIN) $(HV6_ASM) $(O)/hv6/ulib.asm $(O)/hv6/init.asm #$(O)/hv6/fs.img
 
 HV6_QEMUOPTS = $(QEMUOPTS) -drive file=$(O)/hv6/fs.img,format=raw,if=none,id=fs
 

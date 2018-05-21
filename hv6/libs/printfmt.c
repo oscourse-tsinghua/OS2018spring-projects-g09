@@ -205,7 +205,7 @@ libs_vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list
                 p = "(null)";
             }
             if (width > 0 && padc != '-') {
-                for (width -= strnlen(p, precision); width > 0; width --) {
+                for (width -= libs_strnlen(p, precision); width > 0; width --) {
                     putch(padc, putdat);
                 }
             }

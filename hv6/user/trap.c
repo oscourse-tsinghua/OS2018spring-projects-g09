@@ -2,6 +2,7 @@
 #include <uapi/machine/mmu.h>
 #include <uapi/machine/segment.h>
 #include <uapi/machine/trap.h>
+#include <libs/riscv.h>
 
 #define GDT_ENTRY_CS 1
 #define GDT_ENTRY_DS 2
@@ -32,15 +33,16 @@ void trap_init(void)
 {
     uint64_t tss_addr = (uint64_t)&tss;
     size_t i;
-    extern void *trap_vectors[];
+    /// disabled by CY
+    /// extern void *trap_vectors[];
 
-    gdt[GDT_ENTRY_TSS] =
-        SEG_TSSA | SEG_P | SEG_A | SEG_BASELO(tss_addr) | SEG_LIMIT(sizeof(tss) - 1);
-    gdt[GDT_ENTRY_TSS + 1] = SEG_BASEHI(tss_addr);
+    // gdt[GDT_ENTRY_TSS] =
+    //     SEG_TSSA | SEG_P | SEG_A | SEG_BASELO(tss_addr) | SEG_LIMIT(sizeof(tss) - 1);
+    // gdt[GDT_ENTRY_TSS + 1] = SEG_BASEHI(tss_addr);
 
-    for (i = 0; i < countof(idt); ++i)
-        set_gate_desc(&idt[i], 0, GDT_CS, trap_vectors[i], KERNEL_PL);
-    lgdt(&gdt_desc);
+    // for (i = 0; i < countof(idt); ++i)
+    //     set_gate_desc(&idt[i], 0, GDT_CS, trap_vectors[i], KERNEL_PL);
+    // lgdt(&gdt_desc);
 
     while(1);
     /// asm volatile("mov	$16, %%ax\n"

@@ -231,6 +231,7 @@ noreturn void run_current(void)
     hvm_switch(get_page(proc->hvm), get_page(proc->stack) + PAGE_SIZE,
                kva2pa(get_page(proc->page_table_root)), ms_to_cycles(CONFIG_PREEMPT_TIMER),
                launched);
+    while(1);
     __builtin_unreachable();
 }
 

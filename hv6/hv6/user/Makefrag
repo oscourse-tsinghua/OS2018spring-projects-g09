@@ -21,10 +21,18 @@ HV6_FS_SRCS +=                 \
 HV6_FS_SRCS +=                 \
         hv6/user/fs/nvmedisk.c \
 
+# copied from ucore_os_lab
+UCORE_LIBS_SRCS =              \
+        libs/console.c     \
+        libs/printfmt.c           \
+        libs/readline.c          \
+        libs/stdio.S        \
+        libs/string.c         \
+
 HV6_INIT_SRCS :=               \
         hv6/user/init.c        \
         hv6/user/initcode.S    \
-        $(HV6_FS_SRCS)
+        $(HV6_FS_SRCS)          \
 
 HV6_INIT_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(HV6_INIT_SRCS))))
 
@@ -43,6 +51,7 @@ HV6_ULIB_SRCS :=                  \
         hv6/user/lib/umalloc.c    \
         hv6/user/lib/readline.c   \
         hv6/user/lib/usys.S       \
+        $(UCORE_LIBS_SRCS)
 
 HV6_ULIB_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(HV6_ULIB_SRCS))))
 

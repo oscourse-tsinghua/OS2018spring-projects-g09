@@ -1,4 +1,5 @@
 #include <uapi/elf.h>
+#include <libs/riscv.h>
 #include "user.h"
 
 static char argv_data[PAGE_SIZE];

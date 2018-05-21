@@ -1,3 +1,4 @@
+#!/bin/bash
 set -ex
 
 cd ../riscvemu-2017-08-06

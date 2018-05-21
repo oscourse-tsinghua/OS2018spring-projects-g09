@@ -28,6 +28,7 @@ static void user_init(pid_t);
 
 static pn_t boot_alloc(void);
 static pn_t page_walk(pid_t pid, uintptr_t va);
+static void setup_kernel_map(pid_t pid);
 
 static void arch_init(void);
 static void arch_user_init(pid_t pid);
@@ -50,10 +51,9 @@ void main(void)
 
     print_config();
     print_version();
-    check_invariants();
+    /// check_invariants();
 
     libs_cprintf("run_current:\n");
-	while(1);
     run_current();
     panic(NULL);
 }
@@ -141,6 +141,10 @@ static uintptr_t load_elf(pid_t pid, void *p)
             if (off >= filesz)
                 continue;
             memcpy(get_page(frame), binary + off, min(filesz - off, (size_t)PAGE_SIZE));
+
+            if (0x10466 <= va && va <= 0x10466+PAGE_SIZE) {
+            	libs_cprintf("[debug] 0x10466 -> 0x%x\n", 0x10466-va+get_page(frame));
+            }
         }
     }
 
@@ -165,11 +169,13 @@ static void user_init(pid_t pid)
     libs_cprintf("user_init：alloc_proc(pid, page_table_root, stack, hvm)\n");
     r = alloc_proc(pid, page_table_root, stack, hvm);
     assert(r == 0, "alloc_proc");
+    setup_kernel_map(pid);
 
     libs_cprintf("user_init：load_elf(pid, _binary_init_start)\n");
     /* load & allocate pages for init & ulib */
     entry = load_elf(pid, _binary_init_start);
     load_elf(pid, _binary_ulib_start);
+    libs_cprintf("user_init：end load_elf(pid, *)\n");
 
     /* map page_desc_table as read-only */
     n = bytes_to_pages(NPAGE * sizeof(struct page_desc));
@@ -262,6 +268,19 @@ static pn_t page_walk(pid_t pid, uintptr_t va)
     return pt_pn;
 }
 
+static void setup_kernel_map(pid_t pid)
+{
+	const uintptr_t KERNBASE = 0x80000000, KERNSZ = 10*(1<<20);
+	assert(KERNBASE % PAGE_SIZE == 0, "KERNBASE % PAGE_SIZE must be 0");
+	size_t off;
+	pte_t perm = PTE_P | PTE_W | PTE_R | PTE_X;
+	for(off = 0; off < KERNSZ; off += PAGE_SIZE) {
+		uintptr_t va = KERNBASE + off;
+		pn_t pt = page_walk(pid, va);
+		sys_alloc_frame(pid, pt, PT_INDEX(va), va, perm);
+	}
+}
+
 static struct pci_driver drivers[] = {
     PCI_DRIVER_CLASS(PCI_CLASS_MASS_STORAGE, PCI_SUBCLASS_MASS_STORAGE_NVM, PCI_INTERFACE_NVM_NVME),
     /* e1000 (qemu) */
@@ -296,7 +315,7 @@ static void arch_init(void)
     libs_cprintf("fpu_init\n");
     ///fpu_init();//temporarily disabled
     libs_cprintf("hvm_init\n");
-    ///hvm_init();//useless
+    hvm_init();//useless
     libs_cprintf("iommu_init\n");
     iommu_init();
     libs_cprintf("iommu_early_set_dev_region %x %x\n",kva2pa(dmapages), kva2pa(dmapages + NDMAPAGE));

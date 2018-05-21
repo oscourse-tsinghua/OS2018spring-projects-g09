@@ -85,7 +85,7 @@ static int map_iommu_page_table_page(pn_t from, size_t index, physaddr_t pa, iom
     if (!is_page_index_valid(index))
         return -EINVAL;
     /* the same as DMAR_PTE_R | DMAR_PTE_W */
-    if (perm & ~(PTE_P | PTE_W))
+    if (perm & ~(PTE_V | PTE_W))
         return -EINVAL;
 
     entries = get_page(from);

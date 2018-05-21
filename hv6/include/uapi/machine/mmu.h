@@ -50,20 +50,31 @@
 #define FLAGS_VIP BIT64(20) /* virtual interrupt pending */
 #define FLAGS_ID BIT64(21)  /* can use CPUID */
 
+// page table entry (PTE) fields
+#define PTE_V     0x001 // Valid
+#define PTE_R     0x002 // Read
+#define PTE_W     0x004 // Write
+#define PTE_X     0x008 // Execute
+#define PTE_U     0x010 // User
+#define PTE_G     0x020 // Global
+#define PTE_A     0x040 // Accessed
+#define PTE_D     0x080 // Dirty
+#define PTE_SOFT  0x300 // Reserved for Software
+
 #define PTE_P BIT64(0)   /* present */
-#define PTE_W BIT64(1)   /* writable */
-#define PTE_U BIT64(2)   /* user */
+//#define PTE_W BIT64(1)   /* writable */
+//#define PTE_U BIT64(2)   /* user */
 #define PTE_PWT BIT64(3) /* write through */
 #define PTE_PCD BIT64(4) /* cache disable */
-#define PTE_A BIT64(5)   /* accessed */
-#define PTE_D BIT64(6)   /* dirty */
+//#define PTE_A BIT64(5)   /* accessed */
+//#define PTE_D BIT64(6)   /* dirty */
 #define PTE_PS BIT64(7)  /* page size */
-#define PTE_G BIT64(8)   /* global */
+//#define PTE_G BIT64(8)   /* global */
 #define PTE_AVL BITMASK64(11, 9)
 #define PTE_NX BIT64(63) /* execute disable */
 
 #define PTE_ADDR(pte) ((physaddr_t)(pte)&BITMASK64(51, 12))
-#define PTE_PERM_MASK (PTE_P | PTE_W | PTE_U | PTE_PWT | PTE_PCD | PTE_AVL | PTE_NX)
+#define PTE_PERM_MASK (PTE_V | PTE_W | PTE_U | PTE_X | PTE_R)
 #define PTE_PFN_SHIFT 12
 
 #define PAGE_SHIFT 12
@@ -98,7 +109,7 @@
 
 static inline bool pte_valid(uintptr_t x)
 {
-    return x & PTE_P;
+    return x & PTE_V;
 }
 
 static inline bool pte_writable(uintptr_t x)
@@ -108,7 +119,7 @@ static inline bool pte_writable(uintptr_t x)
 
 static inline bool pte_executable(uintptr_t x)
 {
-    return !(x & PTE_NX);
+    return x & PTE_X;
 }
 
 static inline bool pte_dirty(uintptr_t x)

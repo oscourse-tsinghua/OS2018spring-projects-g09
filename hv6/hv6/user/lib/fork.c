@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <libs/riscv.h>
 #include "user.h"
 
 static void dup_pt(pid_t pid, pn_t pt, size_t n)
