@@ -75,7 +75,7 @@
 
 #define PTE_ADDR(pte) ((physaddr_t)(pte)&BITMASK64(51, 12))
 #define PTE_PERM_MASK (PTE_V | PTE_W | PTE_U | PTE_X | PTE_R)
-#define PTE_PFN_SHIFT 12
+#define PTE_PFN_SHIFT 10 //for RISCV-64
 
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (UINT64_C(1) << PAGE_SHIFT)
