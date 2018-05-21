@@ -1,9 +1,14 @@
 #include "user.h"
 
+int libs_cprintf(const char *fmt, ...);
+
 noreturn void fs_main(void);
 
 noreturn void main(void)
 {
+    libs_cprintf("Hello INIT\n");
+    while(1);
+
     pid_t pid;
     int r;
 

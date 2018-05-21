@@ -29,10 +29,13 @@ UCORE_LIBS_SRCS =              \
         libs/stdio.S        \
         libs/string.c         \
 
+UCORE_LIBS_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(UCORE_LIBS_SRCS))))
+
 HV6_INIT_SRCS :=               \
         hv6/user/init.c        \
         hv6/user/initcode.S    \
         $(HV6_FS_SRCS)          \
+        $(UCORE_LIBS_SRCS)
 
 HV6_INIT_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(HV6_INIT_SRCS))))
 
@@ -82,6 +85,8 @@ HV6_UPROGS :=                       \
         $(O)/hv6/user/wc            \
         $(O)/hv6/user/wttr          \
         #$(O)/hv6/user/vncd          \
+
+HV6_UPROGS := 
 
 HV6_LINUX_UPROGS :=                 \
         hv6/user/linux/bench_linux  \

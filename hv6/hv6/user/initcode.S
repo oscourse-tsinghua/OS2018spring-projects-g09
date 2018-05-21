@@ -13,8 +13,7 @@ _start:
 	call	main
 #endif
 _start:
-spin:
-	j	spin
+	call main
 
 .section .bss
 .balign	PAGE_SIZE

@@ -46,6 +46,7 @@ void main(void)
     libs_cprintf("vm_init:\n");
     vm_init();
     libs_cprintf("user_init:\n");
+    libs_cprintf("pages = 0x%x\n", pages);
     user_init(INITPID);
 
     print_config();
@@ -131,7 +132,7 @@ static uintptr_t load_elf(pid_t pid, void *p)
         binary = (void *)ehdr + phdr->p_offset;
         for (off = 0; off < memsz; off += PAGE_SIZE, va += PAGE_SIZE) {
             pn_t pt, frame;
-            pte_t perm = PTE_P | PTE_W;
+            pte_t perm = PTE_P | PTE_W | PTE_R | PTE_X;
 
             pt = page_walk(pid, va);
             frame = boot_alloc();
@@ -237,6 +238,9 @@ static pn_t page_walk(pid_t pid, uintptr_t va)
     } else {
         pdpt_pn = pfn_to_pn(PTE_ADDR(entry) / PAGE_SIZE);
     }
+    if (va == 0x8020a7d2) {
+    	libs_cprintf("pml4_index = %d pml4[pml4_index] = 0x%x\n", pml4_index, pml4[pml4_index]);
+    }
 
     pdpt = get_page(pdpt_pn);
     pdpt_index = PDPT_INDEX(va);
@@ -270,18 +274,25 @@ static pn_t page_walk(pid_t pid, uintptr_t va)
 
 static void setup_kernel_map(pid_t pid)
 {
-	const uintptr_t KERNBASE = 0x80000000, KERNSZ = 10*(1<<20);
+	const uintptr_t KERNBASE = 0x80000000, KERNSZ = 100*(1<<20);
 	assert(KERNBASE % PAGE_SIZE == 0, "KERNBASE % PAGE_SIZE must be 0");
 	size_t off;
 	pte_t perm = PTE_P | PTE_W | PTE_R | PTE_X;
 	for(off = 0; off < KERNSZ; off += PAGE_SIZE) {
 		uintptr_t va = KERNBASE + off;
 		pn_t pt = page_walk(pid, va);
-		sys_alloc_frame(pid, pt, PT_INDEX(va), va, perm);
-		if (va <= 0x8020a7d2 && 0x8020a7d2 < va + PAGE_SIZE) {
+		assert((va - (uintptr_t)pages) % PAGE_SIZE == 0, "(va - pages) % PAGE_SIZE != 0");
+		pte_t* pt_page = get_page(pt);
+		pt_page[PT_INDEX(va)] = ((va >> PAGE_SHIFT) << PTE_PFN_SHIFT) | perm;
+//		int r = sys_alloc_frame(pid, pt, PT_INDEX(va), (va - (uintptr_t)pages)/PAGE_SIZE, perm);
+//		libs_cprintf("sys_alloc_frame r = %d\n", r);
+//		assert(r == 0, "sys_alloc_frame");
+		if (va <= 0x8020afd8 && 0x8020afd8 < va + PAGE_SIZE) {
 			libs_cprintf("debug mode\n");
 		}
 	}
+//	pn_t pt = page_walk(pid, 0x8020a7d2);
+//	libs_cprintf("root = 0x%x pt = %d\n", get_page(get_proc(pid)->page_table_root), pt);
 }
 
 static struct pci_driver drivers[] = {

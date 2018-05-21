@@ -58,8 +58,7 @@ void riscv_hvm_set_pid(void *hvm, pid_t pid)
 
 void riscv_hvm_switch(void *hvm, void *stack, register_t cr3, timer_t timer, int launched)
 {
-	write_csr(satp, (0x8000000000000000) | (cr3 >> RISCV_PGSHIFT));
-	while(1);
+	write_csr(satp, (0x9000000000000000) | (cr3 >> RISCV_PGSHIFT));
 	// lcr3(cr3);
 	hvm_invalidate_tlb(0);
 	libs_cprintf("main = 0x%x\n", main);

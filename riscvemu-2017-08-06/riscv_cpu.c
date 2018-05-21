@@ -459,6 +459,11 @@ static int get_phys_addr(RISCVCPUState *s,
     int need_write, vaddr_shift, i, pte_addr_bits;
     target_ulong pte_addr, pte, vaddr_mask, paddr;
 
+    *ppaddr = 0;
+    if (OS_DEBUGMODE) {
+        // dump_regs(s);
+    }
+
     if ((s->mstatus & MSTATUS_MPRV) && access != ACCESS_CODE) {
         /* use previous priviledge */
         priv = (s->mstatus >> MSTATUS_MPP_SHIFT) & 3;
@@ -516,28 +521,41 @@ static int get_phys_addr(RISCVCPUState *s,
         else
             pte = phys_read_u64(s, pte_addr);
         //printf("pte=0x%08" PRIx64 "\n", pte);
-        if (!(pte & PTE_V_MASK))
+        if (!(pte & PTE_V_MASK)) {
+            if (OS_DEBUGMODE) {
+                fprintf(stderr, "get_phys_addr[3.1] i = %d PTE_V_MASK = %d pte = 0x%x\n", i, PTE_V_MASK, pte);
+                fprintf(stderr, "mode = %d levels = %d vaddr_shift = %d pte_idx = %d pte_addr = 0x%x\n", mode, levels, vaddr_shift, pte_idx, pte_addr);
+            }
             return -1; /* invalid PTE */
+        }
         paddr = (pte >> 10) << PG_SHIFT;
         xwr = (pte >> 1) & 7;
         if (xwr != 0) {
-            if (xwr == 2 || xwr == 6)
+            if (xwr == 2 || xwr == 6) {
+                if (OS_DEBUGMODE) fprintf(stderr, "get_phys_addr[3.2] xwr = 0x%x i = %d\n", xwr, i);
                 return -1;
+            }
             /* priviledge check */
             if (priv == PRV_S) {
-                if ((pte & PTE_U_MASK) && !(s->mstatus & MSTATUS_SUM))
+                if ((pte & PTE_U_MASK) && !(s->mstatus & MSTATUS_SUM)) {
+                    if (OS_DEBUGMODE) fprintf(stderr, "get_phys_addr[3.3]\n");
                     return -1;
+                }
             } else {
-                if (!(pte & PTE_U_MASK))
+                if (!(pte & PTE_U_MASK)) {
+                    if (OS_DEBUGMODE) fprintf(stderr, "get_phys_addr[3.4]\n");
                     return -1;
+                }
             }
             /* protection check */
             /* MXR allows read access to execute-only pages */
             if (s->mstatus & MSTATUS_MXR)
                 xwr |= (xwr >> 2);
 
-            if (((xwr >> access) & 1) == 0)
+            if (((xwr >> access) & 1) == 0) {
+                if (OS_DEBUGMODE) fprintf(stderr, "get_phys_addr[3.5]\n");
                 return -1;
+            }
             need_write = !(pte & PTE_A_MASK) ||
                 (!(pte & PTE_D_MASK) && access == ACCESS_WRITE);
             pte |= PTE_A_MASK;
@@ -814,6 +832,7 @@ static no_inline __exception int target_read_insn_slow(RISCVCPUState *s,
     if (get_phys_addr(s, &paddr, addr, ACCESS_CODE)) {
         s->pending_tval = addr;
         s->pending_exception = CAUSE_FETCH_PAGE_FAULT;
+        if (OS_DEBUGMODE) fprintf(stderr, "CAUSE_FETCH_PAGE_FAULT\n");
         return -1;
     }
     pr = get_phys_mem_range(s->mem_map, paddr);
@@ -821,6 +840,7 @@ static no_inline __exception int target_read_insn_slow(RISCVCPUState *s,
         /* XXX: we only access to execute code from RAM */
         s->pending_tval = addr;
         s->pending_exception = CAUSE_FAULT_FETCH;
+        fprintf(stderr, "CAUSE_FAULT_FETCH: addr = 0x%x paddr = 0x%x\n", addr, paddr);
         return -1;
     }
     tlb_idx = (addr >> PG_SHIFT) & (TLB_SIZE - 1);
@@ -1611,17 +1631,28 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
 		exit(1);
 	}
 
-	static uint64_t last_counter = 0, count = 0;
-	if (s->insn_counter == last_counter) count ++;
+	static uint64_t last_insn_counter = 0, insn_counter_count = 0;
+	if (s->insn_counter == last_insn_counter) insn_counter_count ++;
 	else {
-		last_counter = s->insn_counter;
-		count = 1;
+		last_insn_counter = s->insn_counter;
+		insn_counter_count = 1;
 	}
-	if (count > 10) {
+	if (insn_counter_count > 10) {
+		fprintf(stderr, "riscvemu exit because of s->pc always same\n");
+		exit(1);
+	}
+    static uint64_t last_pc = 0, pc_count = 0;
+	if (s->pc == last_pc) pc_count ++;
+	else {
+		last_pc = s->pc;
+		pc_count = 1;
+	}
+	if (pc_count > 10) {
 		fprintf(stderr, "riscvemu exit because of s->insn_counter always same\n");
 		exit(1);
 	}
-	if (s->insn_counter > 10000000) {
+
+	if (s->insn_counter > 200000000) {
 		fprintf(stderr, "riscvemu exit because of s->insn_counter = %d is too large\n", s->insn_counter);
 		exit(1);
 	}

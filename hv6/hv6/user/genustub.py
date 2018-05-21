@@ -10,6 +10,8 @@ for line in fileinput.input():
         continue
     if name in ['_start', 'main']:
         continue
+    if name.startswith('libs'):
+        continue
     #/// print('.global\t{}'.format(name))
     # print('{}:'.format(name))
     # print('\tmovq\t$0x{}, %rax'.format(addr))

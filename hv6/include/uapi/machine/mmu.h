@@ -73,7 +73,7 @@
 #define PTE_AVL BITMASK64(11, 9)
 #define PTE_NX BIT64(63) /* execute disable */
 
-#define PTE_ADDR(pte) ((physaddr_t)(pte)&BITMASK64(51, 12))
+#define PTE_ADDR(pte) (((physaddr_t)(pte) >> PTE_PFN_SHIFT) << PAGE_SHIFT)
 #define PTE_PERM_MASK (PTE_V | PTE_W | PTE_U | PTE_X | PTE_R)
 #define PTE_XWR_MASK (PTE_W | PTE_X | PTE_R)
 #define PTE_PFN_SHIFT 10 //for RISCV-64

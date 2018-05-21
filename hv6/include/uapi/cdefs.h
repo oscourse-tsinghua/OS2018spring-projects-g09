@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdnoreturn.h>
 #include <limits.h>
+int libs_cprintf(const char *fmt, ...);
 #else
 #define UINT32_C(x) x
 #define UINT64_C(x) x
@@ -188,8 +189,10 @@ typedef int64_t pid_t;
 
 #define assert(exp, fmt, ...)                                                                      \
     ({                                                                                             \
-        if (!(exp))                                                                                \
+        if (!(exp)) {                                                                               \
+        	libs_cprintf("%s:%d: %s: assert failed: " fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__);  \
             panic("%s:%d: %s: assert failed: " fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__);  \
+        } \
     })
 
 #define LOG_EMERG 0
