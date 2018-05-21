@@ -46,7 +46,6 @@ void main(void)
     libs_cprintf("vm_init:\n");
     vm_init();
     libs_cprintf("user_init:\n");
-    write_csr(dcsr,1);//open RISCVEMU debug
     user_init(INITPID);
 
     print_config();
@@ -54,6 +53,7 @@ void main(void)
     /// check_invariants();
 
     libs_cprintf("run_current:\n");
+    write_csr(dcsr,1);//open RISCVEMU debug
     run_current();
     panic(NULL);
 }
@@ -278,6 +278,9 @@ static void setup_kernel_map(pid_t pid)
 		uintptr_t va = KERNBASE + off;
 		pn_t pt = page_walk(pid, va);
 		sys_alloc_frame(pid, pt, PT_INDEX(va), va, perm);
+		if (va <= 0x8020a7d2 && 0x8020a7d2 < va + PAGE_SIZE) {
+			libs_cprintf("debug mode\n");
+		}
 	}
 }
 
