@@ -222,7 +222,7 @@ static pn_t page_walk(pid_t pid, uintptr_t va)
     size_t pml4_pn, pdpt_pn, pd_pn, pt_pn;
     size_t pml4_index, pdpt_index, pd_index, pt_index;
     pte_t *pml4, *pdpt, *pd, *pt;
-    pte_t perm = PTE_P | PTE_W;
+    pte_t perm = PTE_P | PTE_W | PTE_R;
     int r;
 
     pml4_pn = get_proc(pid)->page_table_root;
