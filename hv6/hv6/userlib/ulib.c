@@ -1,6 +1,8 @@
 #include <uapi/machine/trap.h>
 #include <uapi/elf.h>
 #include <libs/riscv.h>
+#include <stdint.h>
+#include <libs/stdio.h>
 #include "user.h"
 
 /* pfn of the first page */
@@ -8,28 +10,36 @@ static size_t pfn_pages;
 
 static trap_handler_t trap_handlers[256];
 
-void trap_init(void);
-void linux_init(void);
+/// void trap_init(void);
+/// void linux_init(void);
 noreturn void fs_serve(void);
 
-void ulib_init(void)
+noreturn void enter_user_mode(void (*fn)());
+
+void** ulib_syscalls;
+
+void ulib_init(void* _ulib_syscalls[], void (*fn)())
 {
+	ulib_syscalls = _ulib_syscalls;
+
     pid_t pid;
     int r;
     size_t i, n;
 
-    trap_init();
-    reset_trap_handlers();
+    /// trap_init();
+    /// reset_trap_handlers();
 
     /* set the pfn of the first page */
     assert(upages[0].type == PAGE_TYPE_X86_PML4, "page 0 must be the page table root of init");
     pfn_pages = rcr3() / PAGE_SIZE;
     /* safe to use getpid after setting pfn_pages */
     pid = getpid();
+    libs_cprintf("ulib_init pid = %d\n", pid);
 
+    write_csr(dcsr,1);//open RISCVEMU debug
     /* set up uvpt */
-    r = sys_map_pml4(pid, UVPML4_INDEX, PTE_P);
-    assert(r == 0, "sys_map_pml4");
+//    r = sys_map_pml4(pid, UVPML4_INDEX, PTE_P);
+//    assert(r == 0, "sys_map_pml4");
 
     /* set up uprocs */
     n = bytes_to_pages(NPROC * sizeof(struct proc));
@@ -71,9 +81,23 @@ void ulib_init(void)
     }
 
     /* set up syscall interception */
-    linux_init();
+    /// linux_init();
+
+    enter_user_mode(fn);
 }
 
+void enter_user_mode(void (*fn)())
+{
+	uintptr_t sstatus = read_csr(sstatus);
+	sstatus &= ~SSTATUS_SPP;
+	write_csr(sstatus, sstatus);
+	write_csr(sepc, fn);
+
+	asm volatile ("sret");
+}
+
+/// removed
+#if 0
 void trap(struct trap_frame *tf, int trapnum)
 {
     trap_handler_t handler = trap_handlers[trapnum];
@@ -114,6 +138,7 @@ void reset_trap_handlers(void)
     memset(trap_handlers, 0, sizeof(trap_handlers));
     register_trap_handler(TRAP_UD, trap_invalid_opcode);
 }
+#endif
 
 noreturn void panic(const char *fmt, ...)
 {
@@ -309,6 +334,7 @@ fn_t find_free_fn(void)
     panic("file table full");
 }
 
+/*
 int is_page_mapped(uintptr_t va)
 {
     if (!(uvpml4[PML4_INDEX(va)] & PTE_P))
@@ -322,23 +348,90 @@ int is_page_mapped(uintptr_t va)
         return false;
     return true;
 }
+*/
+
+static inline void *get_page(pn_t pn)
+{
+    return (pn + pfn_pages)*PAGE_SIZE;
+}
 
 pn_t page_walk(uintptr_t va)
 {
+	pid_t pid = getpid();
+    uintptr_t entry;
+    size_t pml4_pn, pdpt_pn, pd_pn, pt_pn;
+    size_t pml4_index, pdpt_index, pd_index, pt_index;
+    pte_t *pml4, *pdpt, *pd, *pt;
+    pte_t perm = PTE_P | PTE_W | PTE_R;
+    int r;
+
+    pml4_pn = phys_to_pn(rcr3());
+    pml4 = get_page(pml4_pn);
+    pml4_index = PML4_INDEX(va);
+    entry = pml4[pml4_index];
+    if (!pte_valid(entry)) {
+        pdpt_pn = find_free_page();
+        r = sys_alloc_pdpt(pid, pml4_pn, pml4_index, pdpt_pn, perm);
+        assert(r == 0, "alloc_pdpt");
+    } else {
+        pdpt_pn = phys_to_pn(PTE_ADDR(entry));
+    }
+
+    pdpt = get_page(pdpt_pn);
+    pdpt_index = PDPT_INDEX(va);
+    entry = pdpt[pdpt_index];
+    if (!pte_valid(entry)) {
+        pd_pn = find_free_page();
+        r = sys_alloc_pd(pid, pdpt_pn, pdpt_index, pd_pn, perm);
+        assert(r == 0, "alloc_pd");
+    } else {
+        pd_pn = phys_to_pn(PTE_ADDR(entry));
+    }
+
+    pd = get_page(pd_pn);
+    pd_index = PD_INDEX(va);
+    entry = pd[pd_index];
+    if (!pte_valid(entry)) {
+        pt_pn = find_free_page();
+        r = sys_alloc_pt(pid, pd_pn, pd_index, pt_pn, perm);
+        assert(r == 0, "alloc_pt");
+    } else {
+        pt_pn = phys_to_pn(PTE_ADDR(entry));
+    }
+
+    pt = get_page(pt_pn);
+    pt_index = PT_INDEX(va);
+    entry = pt[pt_index];
+    assert(!(pte_valid(entry)), "this address already mapped");
+
+    return pt_pn;
+}
+
+/*
+pn_t page_walk(uintptr_t va)
+{
     pid_t pid = getpid();
-    pte_t entry, perm = PTE_P | PTE_W;
+    pte_t entry, perm = PTE_P | PTE_W | PTE_R;
     pn_t pml4, pdpt, pd, pt;
     int r;
 
     pml4 = phys_to_pn(rcr3());
+    libs_cprintf("page_walk[0] va = 0x%llx rcr3 = 0x%llx uvpml4 = 0x%llx\n", va, rcr3(), uvpml4);
+    libs_cprintf("PML4_INDEX(va) = %d\n", PML4_INDEX(va));
     entry = uvpml4[PML4_INDEX(va)];
+    libs_cprintf("entry = 0x%llx 0x%llx\n", uvpml4, uvpml4[0]);
     if (!(entry & PTE_P)) {
+    	libs_cprintf("page_walk[0.01] va = 0x%llx entry = %d uvpml4 = 0x%llx index = %d\n", va, entry, uvpml4, PML4_INDEX(va));
         pdpt = find_free_page();
+        libs_cprintf("page_walk[0.1] va = 0x%llx pdpt = %d type = %d\n", va, pdpt, upages[pdpt].type);
+        libs_cprintf("page_walk[0.1] va = 0x%llx from type = %d\n", va, upages[pml4].type);
         r = sys_alloc_pdpt(pid, pml4, PML4_INDEX(va), pdpt, perm);
+        libs_cprintf("page_walk[0.2] va = 0x%llx r = %d\n", va, r);
         assert(r == 0, "sys_alloc_pdpt");
     } else {
         pdpt = phys_to_pn(PTE_ADDR(entry));
     }
+    libs_cprintf("page_walk[1] va = 0x%llx\n", va);
 
     entry = uvpdpt[(va >> PDPT_SHIFT) & (PTRS_PER_PML4 * PTRS_PER_PDPT - 1)];
     if (!(entry & PTE_P)) {
@@ -348,6 +441,7 @@ pn_t page_walk(uintptr_t va)
     } else {
         pd = phys_to_pn(PTE_ADDR(entry));
     }
+    libs_cprintf("page_walk[1] va = 0x%llx\n", va);
 
     entry = uvpd[(va >> PD_SHIFT) & (PTRS_PER_PML4 * PTRS_PER_PDPT * PTRS_PER_PD - 1)];
     if (!(entry & PTE_P)) {
@@ -357,12 +451,14 @@ pn_t page_walk(uintptr_t va)
     } else {
         pt = phys_to_pn(PTE_ADDR(entry));
     }
+    libs_cprintf("page_walk[1] va = 0x%llx\n", va);
 
     entry =
         uvpt[(va >> PT_SHIFT) & (PTRS_PER_PML4 * PTRS_PER_PDPT * PTRS_PER_PD * PTRS_PER_PT - 1)];
 
     return pt;
 }
+*/
 
 void map_pages(uintptr_t va, size_t n, pte_t perm)
 {
@@ -379,6 +475,7 @@ void map_pages(uintptr_t va, size_t n, pte_t perm)
     }
 }
 
+/*
 void protect_pages(uintptr_t va, size_t n, pte_t perm)
 {
     pn_t pt;
@@ -394,11 +491,11 @@ void protect_pages(uintptr_t va, size_t n, pte_t perm)
         assert(r == 0, "sys_protect_frame: %d", r);
     }
 }
+*/
 
 pn_t phys_to_pn(physaddr_t pa)
 {
     pn_t pfn = pa / PAGE_SIZE;
-
     assert(pfn >= pfn_pages && pfn < pfn_pages + NPAGE, "pa must be in bounds");
     return pfn - pfn_pages;
 }
@@ -414,10 +511,12 @@ physaddr_t virt_to_phys(const void *va)
     pte_t entry;
 
     assert((uintptr_t)va % PAGE_SIZE == 0, "va must be page-aligned");
-    vpn = ((uintptr_t)va >> PT_SHIFT) &
-          (PTRS_PER_PML4 * PTRS_PER_PDPT * PTRS_PER_PD * PTRS_PER_PT - 1);
-    entry = uvpt[vpn];
+
+    pn_t pte_pn = page_walk(va);
+    pte_t* pte = get_page(pte_pn);
+    entry = pte[PT_INDEX(va)];
     assert(entry & PTE_P, "page must be present");
+
     return PTE_ADDR(entry);
 }
 

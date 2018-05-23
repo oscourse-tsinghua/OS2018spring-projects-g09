@@ -6,7 +6,7 @@
 void svm_init(void);
 void vmx_init(void);
 
-void (*hvm_user_init)(void *hvm, register_t rip);
+void (*hvm_user_init)(void *hvm, uintptr_t user_entry, uintptr_t ulib_entry);
 void (*hvm_switch)(void *hvm, void *stack, register_t cr3, timer_t timer, int launched);
 void (*hvm_flush)(void *hvm);
 void (*hvm_copy)(void *dst, void *src, pid_t pid);
@@ -39,31 +39,50 @@ SPIN_FUNC(hvm_extintr)
 
 void riscv_hvm_invalidate_tlb(pid_t pid)
 {
-	asm("sfence.vma");
+	asm volatile ("sfence.vma");
 }
 
 int libs_cprintf(const char *fmt, ...);
-void (*main)();
 
-void riscv_hvm_user_init(void *hvm, register_t rip)
+typedef struct
 {
-	main = rip;
-	libs_cprintf("rip = 0x%x\n", rip);
+	uintptr_t user_entry;
+	uintptr_t ulib_entry;
+	pid_t pid;
+} hvm_t;
+
+void riscv_hvm_user_init(void *_hvm, uintptr_t user_entry, uintptr_t ulib_entry)
+{
+	hvm_t *hvm = _hvm;
+	hvm->user_entry = user_entry;
+	hvm->ulib_entry = ulib_entry;
 }
 
-void riscv_hvm_set_pid(void *hvm, pid_t pid)
+void riscv_hvm_set_pid(void *_hvm, pid_t pid)
 {
-	// nothing
+	hvm_t *hvm = _hvm;
+	hvm->pid = pid;
 }
 
-void riscv_hvm_switch(void *hvm, void *stack, register_t cr3, timer_t timer, int launched)
+void riscv_hvm_switch(void *_hvm, void *stack, register_t cr3, timer_t timer, int launched)
 {
-	write_csr(satp, (0x9000000000000000) | (cr3 >> RISCV_PGSHIFT));
-	// lcr3(cr3);
+	hvm_t *hvm = _hvm;
+
+	libs_cprintf("cr3 = 0x%llx\n", cr3);
+	lcr3(cr3);
 	hvm_invalidate_tlb(0);
-	libs_cprintf("main = 0x%x\n", main);
+	libs_cprintf("user_entry = 0x%llx ulib_entry = 0x%llx pid = %d\n", hvm->user_entry, hvm->ulib_entry, hvm->pid);
 
-	main();
+	extern void *syscalls[];
+	void (*entry)(void *syscalls[], void (*fn)());
+	entry = hvm->ulib_entry;
+	entry(syscalls, (void*)hvm->user_entry);
+//	uintptr_t sstatus = read_csr(sstatus);
+//	sstatus &= ~SSTATUS_SPP;
+//	write_csr(sstatus, sstatus);
+//	write_csr(sepc, main);
+//
+//	asm volatile ("sret");
 }
 
 void hvm_init(void)

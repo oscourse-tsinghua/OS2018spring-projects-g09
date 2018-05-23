@@ -24,11 +24,11 @@
 #define UECAM_END (UECAM_START + SZ_256M)
 
 /* 0xffff880000000000 - */
-#define UVPML4_INDEX UINT64_C(272)
-#define UVPT (ULIB_START | (UVPML4_INDEX << PML4_SHIFT))
-#define UVPD (UVPT | (UVPML4_INDEX << PDPT_SHIFT))
-#define UVPDPT (UVPD | (UVPML4_INDEX << PD_SHIFT))
-#define UVPML4 (UVPDPT | (UVPML4_INDEX << PT_SHIFT))
+//#define UVPML4_INDEX UINT64_C(272)
+//#define UVPT (ULIB_START | (UVPML4_INDEX << PML4_SHIFT))
+//#define UVPD (UVPT | (UVPML4_INDEX << PDPT_SHIFT))
+//#define UVPDPT (UVPD | (UVPML4_INDEX << PD_SHIFT))
+//#define UVPML4 (UVPDPT | (UVPML4_INDEX << PT_SHIFT))
 
 /* leave one page unmapped at the top of the canonical lower half */
 #define USTACK_TOP (BIT64(47) - PAGE_SIZE)

@@ -1,6 +1,7 @@
 #include <uapi/assym.h>
 #include "trap.h"
 
+/*///
 ASSYM(TRAP_REGS_R15, offsetof(struct trap_regs, r15));
 ASSYM(TRAP_REGS_R14, offsetof(struct trap_regs, r14));
 ASSYM(TRAP_REGS_R13, offsetof(struct trap_regs, r13));
@@ -17,3 +18,4 @@ ASSYM(TRAP_REGS_RDX, offsetof(struct trap_regs, rdx));
 ASSYM(TRAP_REGS_RSI, offsetof(struct trap_regs, rsi));
 ASSYM(TRAP_REGS_RDI, offsetof(struct trap_regs, rdi));
 ASSYM(TRAP_REGS_SIZE, sizeof(struct trap_regs));
+*/

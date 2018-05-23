@@ -41,6 +41,8 @@ void main(void)
     libs_cprintf("%s\n\n", "hv6-riscv os is loading ...\n");
     libs_cprintf("Hello World\n");
 	print_config();
+	libs_cprintf("init_syscalls:\n");
+	init_syscalls();
     libs_cprintf("arch_init:\n");
     arch_init();
     libs_cprintf("vm_init:\n");
@@ -132,7 +134,7 @@ static uintptr_t load_elf(pid_t pid, void *p)
         binary = (void *)ehdr + phdr->p_offset;
         for (off = 0; off < memsz; off += PAGE_SIZE, va += PAGE_SIZE) {
             pn_t pt, frame;
-            pte_t perm = PTE_P | PTE_W | PTE_R | PTE_X;
+            pte_t perm = PTE_P | PTE_W | PTE_R | PTE_X | PTE_U;
 
             pt = page_walk(pid, va);
             frame = boot_alloc();
@@ -159,7 +161,7 @@ static void user_init(pid_t pid)
     pn_t page_table_root, stack;
     pn_t hvm;
     int r;
-    uintptr_t entry;
+    uintptr_t user_entry, ulib_entry;
     void *phvm;
 
     current = pid;
@@ -174,8 +176,8 @@ static void user_init(pid_t pid)
 
     libs_cprintf("user_init：load_elf(pid, _binary_init_start)\n");
     /* load & allocate pages for init & ulib */
-    entry = load_elf(pid, _binary_init_start);
-    load_elf(pid, _binary_ulib_start);
+    user_entry = load_elf(pid, _binary_init_start);
+    ulib_entry = load_elf(pid, _binary_ulib_start);
     libs_cprintf("user_init：end load_elf(pid, *)\n");
 
     /* map page_desc_table as read-only */
@@ -183,7 +185,7 @@ static void user_init(pid_t pid)
     for (i = 0; i < n; ++i) {
         pn_t pt;
         uintptr_t va;
-        pte_t perm = PTE_P;
+        pte_t perm = PTE_P | PTE_R;
 
         va = UPAGES_START + i * PAGE_SIZE;
         pt = page_walk(pid, va);
@@ -197,7 +199,7 @@ static void user_init(pid_t pid)
 #endif
 
     phvm = get_page(hvm);
-    hvm_user_init(phvm, entry);
+    hvm_user_init(phvm, user_entry, ulib_entry);
     hvm_set_pid(phvm, pid);
     get_proc(pid)->state = PROC_RUNNING;
     FREELIST_INIT(proc_table, ready, pid);
@@ -284,15 +286,7 @@ static void setup_kernel_map(pid_t pid)
 		assert((va - (uintptr_t)pages) % PAGE_SIZE == 0, "(va - pages) % PAGE_SIZE != 0");
 		pte_t* pt_page = get_page(pt);
 		pt_page[PT_INDEX(va)] = ((va >> PAGE_SHIFT) << PTE_PFN_SHIFT) | perm;
-//		int r = sys_alloc_frame(pid, pt, PT_INDEX(va), (va - (uintptr_t)pages)/PAGE_SIZE, perm);
-//		libs_cprintf("sys_alloc_frame r = %d\n", r);
-//		assert(r == 0, "sys_alloc_frame");
-		if (va <= 0x8020afd8 && 0x8020afd8 < va + PAGE_SIZE) {
-			libs_cprintf("debug mode\n");
-		}
 	}
-//	pn_t pt = page_walk(pid, 0x8020a7d2);
-//	libs_cprintf("root = 0x%x pt = %d\n", get_page(get_proc(pid)->page_table_root), pt);
 }
 
 static struct pci_driver drivers[] = {

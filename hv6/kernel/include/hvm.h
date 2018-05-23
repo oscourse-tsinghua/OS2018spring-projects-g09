@@ -5,7 +5,7 @@
 struct trap_regs;
 
 void hvm_init(void);
-extern void (*hvm_user_init)(void *hvm, register_t rip);
+extern void (*hvm_user_init)(void *hvm, uintptr_t user_entry, uintptr_t ulib_entry);
 extern void (*hvm_switch)(void *hvm, void *stack, register_t cr3, timer_t timer, int launched);
 extern void (*hvm_flush)(void *hvm);
 extern void (*hvm_copy)(void *dst, void *src, pid_t pid);

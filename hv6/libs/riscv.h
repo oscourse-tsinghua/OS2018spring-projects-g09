@@ -233,12 +233,12 @@
 
 static inline void
 lcr3(unsigned int cr3) {
-    write_csr(sptbr, cr3);
+    write_csr(satp, (0x9000000000000000) | (cr3 >> RISCV_PGSHIFT));
 }
 
 static inline uint64_t
 rcr3() {
-    return read_csr(sptbr);
+    return read_csr(satp) << RISCV_PGSHIFT;
 }
 
 

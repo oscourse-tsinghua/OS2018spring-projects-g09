@@ -6,8 +6,8 @@ noreturn void fs_main(void);
 
 noreturn void main(void)
 {
+	while(1);
     libs_cprintf("Hello INIT\n");
-    while(1);
 
     pid_t pid;
     int r;

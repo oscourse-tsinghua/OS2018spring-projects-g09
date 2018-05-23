@@ -58,3 +58,10 @@
 #define SYS_debug_print_screen 125
 #define SYS_debug_dmesg 126
 #define SYS_debug_sysctl 127
+
+#ifndef __ASSEMBLER__
+
+// called by kernel
+void init_syscalls();
+
+#endif

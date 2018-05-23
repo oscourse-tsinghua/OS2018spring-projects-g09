@@ -13,10 +13,10 @@
 #include "syscall.h"
 #include "types.h"
 
-#define uvpml4 ((pte_t *)UVPML4)
-#define uvpdpt ((pte_t *)UVPDPT)
-#define uvpd ((pte_t *)UVPD)
-#define uvpt ((pte_t *)UVPT)
+//#define uvpml4 ((pte_t *)UVPML4)
+//#define uvpdpt ((pte_t *)UVPDPT)
+//#define uvpd ((pte_t *)UVPD)
+//#define uvpt ((pte_t *)UVPT)
 #define upages ((struct page_desc *)UPAGES_START)
 #define uprocs ((struct proc *)UPROCS_START)
 #define ucurrent (uprocs + getpid())
@@ -43,6 +43,8 @@
 #define SOL_SOCKET 0xfff
 #define SO_ERROR 0x1007
 #define SO_TYPE 0x1008
+
+extern void** ulib_syscalls;
 
 noreturn void sys_debug_exit(int);
 void sys_debug_print_console(physaddr_t addr, size_t len);

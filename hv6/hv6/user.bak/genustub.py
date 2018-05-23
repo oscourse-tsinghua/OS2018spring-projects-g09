@@ -17,7 +17,15 @@ for line in fileinput.input():
     # print('\tmovq\t$0x{}, %rax'.format(addr))
     # print('\tjmpq\t*%rax')
     # print('')
+
+    #print('.global\t{}'.format(name))
+    #print('{}:'.format(name))
+    #print('\tj\t{}'.format(name))
+    #print('')
+
     print('.global\t{}'.format(name))
     print('{}:'.format(name))
-    print('\tj\t{}'.format(name))
+    print('\tli	a5,0x{}'.format(addr))
+    print('\tjr	a5')
+    #print('\taddi	a5,a5,0x{}'.format(addr))
     print('')

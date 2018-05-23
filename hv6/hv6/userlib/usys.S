@@ -1,21 +1,20 @@
-#include <uapi/machine/trap_support.h>
-#include <uapi/errno.h>
-#include "linux.h"
 #include "syscall.h"
 
-#if 0
-///
+/*
 #define SYSCALL(sym)						\
 	.global	sys_##sym;					\
 	sys_##sym:						\
 		movq	$SYS_##sym, %rax;			\
 		vmcall;						\
 		ret
-#endif
-#define SYSCALL(sym)						\
-	.global	sys_##sym;					\
-	sys_##sym:						\
-		j	sys_##sym			\
+*/
+#define SYSCALL(sym)		\
+.global	sys_##sym;			\
+sys_##sym:					\
+	ld		a7, ulib_syscalls;	\
+	addi	a7,a7,8*SYS_##sym;	\
+	ld		a7, 0(a7);			\
+	jr		a7;					\
 
 SYSCALL(map_page_desc)
 SYSCALL(map_pml4)
@@ -72,62 +71,9 @@ SYSCALL(debug_dmesg)
 SYSCALL(debug_sysctl)
 
 .global	exec
-#if 0
-///
 exec:
-	/* push rbp to align the stack; also good for stacktrace */
-	push	%rbp
-	movq	%rsp, %rbp
-	/* switch to high stack */
-	movq	$ulib_stack_top, %rsp
-	/* %rbp is preserved across call */
-	call	do_exec
-	/* switch back the stack on error */
-	movq	%rbp, %rsp
-	pop	%rbp
-	ret
-#endif
-exec:
-	j exec
+	j	exec
 
 .global fexec
-#if 0
-///
 fexec:
-	movq	$ulib_stack_top, %rsp
-	/* do_fexec doesn't return */
-	jmp	do_fexec
-#endif
-fexec:
-	j fexec
-
-.global linux_syscall_entry
-#if 0
-///
-linux_syscall_entry:
-	/* save syscall return address (to fake a regular return) */
-	push	%rcx
-	/* save rflags to stack (to pop later) */
-	push	%r11
-	/* validate the syscall number */
-	cmpq	$NR_linux_syscalls, %rax
-	jb	1f
-	movq	$-ENOSYS, %rax
-	/* need to restore rflags */
-	jmp	2f
-1:
-	subq	$TRAP_REGS_SIZE, %rsp
-	SAVE_C_REGS_EXCEPT_RAX
-	/* sync syscall calling convention with C's */
-	movq	%r10, %rcx
-	movq	$linux_syscalls, %r10
-	leaq	(%r10, %rax, 8), %rax
-	call	*(%rax)
-	LOAD_C_REGS_EXCEPT_RAX
-	addq	$TRAP_REGS_SIZE, %rsp
-2:
-	popfq
-	retq
-#endif
-linux_syscall_entry:
-	j linux_syscall_entry
+	j	fexec

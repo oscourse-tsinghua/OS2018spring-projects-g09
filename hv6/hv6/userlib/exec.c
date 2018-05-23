@@ -85,7 +85,7 @@ noreturn void do_fexec(int fd, char *argv[])
     reset_history();
 
     /* reset trap handlers */
-    reset_trap_handlers();
+    // reset_trap_handlers();
 
     /* map the initial user stack */
     map_pages(USTACK_TOP - USTACK_SIZE, USTACK_SIZE, PTE_P | PTE_W);

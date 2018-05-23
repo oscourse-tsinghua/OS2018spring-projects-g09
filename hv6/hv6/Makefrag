@@ -57,16 +57,14 @@ HV6_KERNEL_SRCS +=             \
         kernel/intel_iommu.c   \
         kernel/mtrr.c          \
         kernel/pic.c           \
-        kernel/svm.c           \
-        kernel/svm_entry.S     \
         kernel/tsc.c           \
-        kernel/vmx.c           \
-        kernel/vmx_entry.S     \
         kernel/xapic.c         \
         drivers/acpi.c         \
         drivers/cga.c          \
         drivers/pci.c          \
         drivers/uart_porte9.c  \
+
+#HV6_KERNEL_SRCS += kernel/svm.c kernel/svm_entry.S kernel/vmx.c kernel/vmx_entry.S
 
 HV6_KERNEL_SRCS +=             \
         libs/console.c     \
@@ -96,6 +94,7 @@ $(HV6_KERNEL_OBJS): CFLAGS += -fno-stack-protector -I kernel -I hv6
 $(HV6_LLS): CFLAGS += -I kernel
 
 # include user specific makefile rules
+include hv6/userlib/Makefrag
 include hv6/user/Makefrag
 
 $(O)/hv6/%.asm: $(O)/hv6/%

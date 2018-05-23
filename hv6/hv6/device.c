@@ -4,7 +4,6 @@
 #include <string.h>
 #include "device.h"
 #include "proc.h"
-#include "vm.h"
 
 /* pci hole pages: pfn -> devid */
 struct pcipage_desc {

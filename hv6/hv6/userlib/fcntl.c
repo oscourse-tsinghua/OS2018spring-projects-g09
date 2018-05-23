@@ -1,5 +1,4 @@
 #include "fs.h"
-#include "socket.h"
 #include "user.h"
 
 static int cwd_fd = -1;
@@ -263,6 +262,12 @@ ssize_t pread(int fd, void *buf, size_t len, off_t offset)
 
 static ssize_t pwrite0(int fd, const void *buf, size_t len, off_t offset)
 {
+    while(1);
+}
+
+/*///
+static ssize_t pwrite0(int fd, const void *buf, size_t len, off_t offset)
+{
     ssize_t r;
 
     if (fd_to_file(fd)->type == FD_SOCKET)
@@ -286,6 +291,7 @@ static ssize_t pwrite0(int fd, const void *buf, size_t len, off_t offset)
     r = ucurrent->ipc_val;
     return r;
 }
+*/
 
 ssize_t pwrite(int fd, const void *buf, size_t len, off_t offset)
 {

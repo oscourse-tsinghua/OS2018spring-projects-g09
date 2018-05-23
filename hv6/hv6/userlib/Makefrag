@@ -1,0 +1,31 @@
+# copied from ucore_os_lab
+UCORE_LIBS_SRCS =              \
+        libs/console.c     \
+        libs/printfmt.c           \
+        libs/readline.c          \
+        libs/stdio.S        \
+        libs/string.c         \
+
+HV6_ULIB_SRCS :=                  \
+        hv6/userlib/exec.c       \
+        hv6/userlib/fcntl.c      \
+        hv6/userlib/fork.c       \
+        hv6/userlib/printf.c     \
+        hv6/userlib/ulib.c       \
+        hv6/userlib/ulib_entry.S \
+        hv6/userlib/ubrk.c       \
+        hv6/userlib/umalloc.c    \
+        hv6/userlib/readline.c   \
+        hv6/userlib/usys.S   \
+        $(UCORE_LIBS_SRCS)
+
+HV6_ULIB_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(HV6_ULIB_SRCS))))
+
+-include $(HV6_ULIB_OBJS:.o=.d)
+
+#$(HV6_ULIB_OBJS): CFLAGS += -mcmodel=kernel
+
+$(HV6_ULIB_OBJS): CFLAGS += -I hv6 -I hv6/userlib -I hv6/userlib/fs
+
+$(O)/hv6/ulib: $(HV6_ULIB_OBJS) hv6/userlib/ulib.lds
+	$(QUIET_LD_USER)$(LD) -o $@ -T hv6/userlib/ulib.lds $(HV6_ULIB_OBJS)

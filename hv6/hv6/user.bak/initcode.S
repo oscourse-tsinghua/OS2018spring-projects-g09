@@ -13,7 +13,12 @@ _start:
 	call	main
 #endif
 _start:
-	call main
+	la	sp, stack_top
+	/* ulib entry point */
+	li	a5, 0xffffffff80000000
+	jalr	a5
+	/* return from ulib_init */
+	call	main
 
 .section .bss
 .balign	PAGE_SIZE

@@ -30,61 +30,47 @@
 
 #ifndef __ASSEMBLER__
 
+struct push_regs {
+    uintptr_t zero;  // Hard-wired zero
+    uintptr_t ra;    // Return address
+    uintptr_t sp;    // Stack pointer
+    uintptr_t gp;    // Global pointer
+    uintptr_t tp;    // Thread pointer
+    uintptr_t t0;    // Temporary
+    uintptr_t t1;    // Temporary
+    uintptr_t t2;    // Temporary
+    uintptr_t s0;    // Saved register/frame pointer
+    uintptr_t s1;    // Saved register
+    uintptr_t a0;    // Function argument/return value
+    uintptr_t a1;    // Function argument/return value
+    uintptr_t a2;    // Function argument
+    uintptr_t a3;    // Function argument
+    uintptr_t a4;    // Function argument
+    uintptr_t a5;    // Function argument
+    uintptr_t a6;    // Function argument
+    uintptr_t a7;    // Function argument
+    uintptr_t s2;    // Saved register
+    uintptr_t s3;    // Saved register
+    uintptr_t s4;    // Saved register
+    uintptr_t s5;    // Saved register
+    uintptr_t s6;    // Saved register
+    uintptr_t s7;    // Saved register
+    uintptr_t s8;    // Saved register
+    uintptr_t s9;    // Saved register
+    uintptr_t s10;   // Saved register
+    uintptr_t s11;   // Saved register
+    uintptr_t t3;    // Temporary
+    uintptr_t t4;    // Temporary
+    uintptr_t t5;    // Temporary
+    uintptr_t t6;    // Temporary
+};
+
 struct trap_frame {
-    /* error code, pushed by hardware or 0 by software */
-    uint64_t err;
-    uint64_t rip;
-    uint64_t cs;
-    uint64_t rflags;
-    /* ss:rsp is always pushed in long mode */
-    uint64_t rsp;
-    uint64_t ss;
-} __packed;
-
-struct trap_regs {
-    /* callee-saved; save only on context switching */
-    register_t r15;
-    register_t r14;
-    register_t r13;
-    register_t r12;
-    register_t rbp;
-    register_t rbx;
-    /* caller-saved registers; always save them on kernel entry */
-    register_t rax;
-    register_t r11;
-    register_t r10;
-    register_t r9;
-    register_t r8;
-    register_t rcx;
-    register_t rdx;
-    register_t rsi;
-    register_t rdi;
-} __packed __aligned(16);
-
-struct fxsave_area {
-    uint16_t fcw;
-    uint16_t fsw;
-    uint16_t ftw;
-    uint16_t fop;
-    uint64_t fip;
-    uint64_t fdp;
-    uint32_t mxcsr;
-    uint32_t mxcsr_mask;
-    uint8_t st[16 * 8];
-    uint8_t xmm[16 * 16];
-    uint8_t padding[16 * 6];
-} __packed __aligned(16);
-
-struct xsave_header {
-    uint64_t xstate_bv;
-    uint64_t xcomp_bv;
-    uint8_t reserved[48];
-} __packed;
-
-struct xsave_area {
-    struct fxsave_area fxsave_area;
-    struct xsave_header xsave_header;
-    /* TODO: AVX, etc. */
-} __packed __aligned(64);
+    struct push_regs gpr;
+    uintptr_t status;
+    uintptr_t epc;
+    uintptr_t badvaddr;
+    uintptr_t cause;
+};
 
 #endif /* !__ASSEMBLER__ */

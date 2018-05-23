@@ -52,6 +52,7 @@ static int sys_debug_dmesg(physaddr_t addr, size_t len, off_t offset)
     return syslog_read(pa2kva(addr), len, offset);
 }
 
+/*
 void *syscalls[NR_syscalls] = {
         [0 ... NR_syscalls - 1] = sys_nop,
         [SYS_map_pml4] = sys_map_pml4,
@@ -109,3 +110,68 @@ void *syscalls[NR_syscalls] = {
         [SYS_debug_dmesg] = sys_debug_dmesg,
         [SYS_debug_sysctl] = sys_debug_sysctl,
 };
+*/
+
+void *syscalls[NR_syscalls];
+
+void init_syscalls()
+{
+	int i;
+	for(i = 0; i < NR_syscalls; i ++) {
+		syscalls[i] = sys_nop;
+	}
+	syscalls[SYS_map_pml4] = sys_map_pml4;
+	syscalls[SYS_map_page_desc] = sys_map_page_desc;
+	syscalls[SYS_map_proc] = sys_map_proc;
+	syscalls[SYS_map_dev] = sys_map_dev;
+	syscalls[SYS_map_file] = sys_map_file;
+	syscalls[SYS_alloc_pdpt] = sys_alloc_pdpt;
+	syscalls[SYS_alloc_pd] = sys_alloc_pd;
+	syscalls[SYS_alloc_pt] = sys_alloc_pt;
+	syscalls[SYS_alloc_frame] = sys_alloc_frame;
+	syscalls[SYS_copy_frame] = sys_copy_frame;
+	syscalls[SYS_protect_frame] = sys_protect_frame;
+	syscalls[SYS_free_pdpt] = sys_free_pdpt;
+	syscalls[SYS_free_pd] = sys_free_pd;
+	syscalls[SYS_free_pt] = sys_free_pt;
+	syscalls[SYS_free_frame] = sys_free_frame;
+	syscalls[SYS_reclaim_page] = sys_reclaim_page;
+	syscalls[SYS_clone] = sys_clone;
+	syscalls[SYS_set_proc_name] = sys_set_proc_name;
+	syscalls[SYS_set_runnable] = sys_set_runnable;
+	syscalls[SYS_switch] = sys_switch;
+	syscalls[SYS_kill] = sys_kill;
+	syscalls[SYS_reap] = sys_reap;
+	syscalls[SYS_reparent] = sys_reparent;
+	syscalls[SYS_send] = sys_send;
+	syscalls[SYS_recv] = sys_recv;
+	syscalls[SYS_reply_wait] = sys_reply_wait;
+	syscalls[SYS_call] = sys_call;
+	syscalls[SYS_create] = sys_create;
+	syscalls[SYS_close] = sys_close;
+	syscalls[SYS_dup] = sys_dup;
+	syscalls[SYS_dup2] = sys_dup2;
+	syscalls[SYS_lseek] = sys_lseek;
+	syscalls[SYS_map_pcipage] = sys_map_pcipage;
+	syscalls[SYS_alloc_iommu_root] = sys_alloc_iommu_root;
+	syscalls[SYS_alloc_iommu_pdpt] = sys_alloc_iommu_pdpt;
+	syscalls[SYS_alloc_iommu_pd] = sys_alloc_iommu_pd;
+	syscalls[SYS_alloc_iommu_pt] = sys_alloc_iommu_pt;
+	syscalls[SYS_alloc_iommu_frame] = sys_alloc_iommu_frame;
+	syscalls[SYS_map_iommu_frame] = sys_map_iommu_frame;
+	syscalls[SYS_reclaim_iommu_frame] = sys_reclaim_iommu_frame;
+	syscalls[SYS_reclaim_iommu_root] = sys_reclaim_iommu_root;
+	syscalls[SYS_alloc_vector] = sys_alloc_vector;
+	syscalls[SYS_reclaim_vector] = sys_reclaim_vector;
+	syscalls[SYS_alloc_intremap] = sys_alloc_intremap;
+	syscalls[SYS_reclaim_intremap] = sys_reclaim_intremap;
+	syscalls[SYS_ack_intr] = sys_ack_intr;
+	syscalls[SYS_alloc_io_bitmap] = sys_alloc_io_bitmap;
+	syscalls[SYS_alloc_port] = sys_alloc_port;
+	syscalls[SYS_reclaim_port] = sys_reclaim_port;
+	syscalls[SYS_debug_exit] = sys_debug_exit;
+	syscalls[SYS_debug_print_console] = sys_debug_print_console;
+	syscalls[SYS_debug_print_screen] = sys_debug_print_screen;
+	syscalls[SYS_debug_dmesg] = sys_debug_dmesg;
+	syscalls[SYS_debug_sysctl] = sys_debug_sysctl;
+}

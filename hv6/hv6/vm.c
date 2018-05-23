@@ -49,25 +49,35 @@ int map_page(pid_t pid, pn_t from_pn, size_t index, pn_t pfn, pte_t perm,
     /* check if pid is current or its embryo */
     if (!is_current_or_embryo(pid))
         return -EACCES;
-    if (!is_page_type(from_pn, from_type))
+    if (!is_page_type(from_pn, from_type)) {
+    	libs_cprintf("map_page:EINVAL[1]\n");
         return -EINVAL;
+    }
     /* check if pid owns from_pfn */
     if (!is_page_pid(from_pn, pid))
         return -EACCES;
-    if (!is_page_index_valid(index))
+    if (!is_page_index_valid(index)) {
+    	libs_cprintf("map_page:EINVAL[2]\n");
         return -EINVAL;
+    }
     /* no check on pfn; left to caller */
     /* check for unsafe bits in page permissions */
-    if (perm & ~PTE_PERM_MASK)
+    if (perm & ~PTE_PERM_MASK) {
+    	libs_cprintf("map_page:EINVAL[3]\n");
         return -EINVAL;
+    }
     /* make sure we have non-zero entries */
-    if (!pte_valid(perm))
+    if (!pte_valid(perm)) {
+    	libs_cprintf("map_page:EINVAL[4]\n");
         return -EINVAL;
+    }
 
     entries = get_page(from_pn);
     /* make sure the entry is empty; may not be necessary but good to check */
-    if (pte_valid(entries[index]))
+    if (pte_valid(entries[index])) {
+    	libs_cprintf("map_page:EINVAL[5]\n");
         return -EINVAL;
+    }
 
     /* update the page table */
     mmio_write64(&entries[index], (pfn << PTE_PFN_SHIFT) | perm);
