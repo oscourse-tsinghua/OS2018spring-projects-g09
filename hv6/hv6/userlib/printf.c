@@ -320,19 +320,24 @@ void cprintf(const char *fmt, ...)
     va_end(ap);
 }
 
-static void debug_print(const void *s, size_t n, void (*func)(physaddr_t, size_t))
-{
-    physaddr_t pa;
-    size_t off, len;
+//static void debug_print(const void *s, size_t n, void (*func)(physaddr_t, size_t))
+//{
+//    physaddr_t pa;
+//    size_t off, len;
+//
+//    off = ((uintptr_t)s) % PAGE_SIZE;
+//    pa = virt_to_phys(s - off) + off;
+//    while (n) {
+//        len = min(n, PAGE_SIZE - (pa % PAGE_SIZE));
+//        func(pa, len);
+//        n -= len;
+//        pa += len;
+//    }
+//}
 
-    off = ((uintptr_t)s) % PAGE_SIZE;
-    pa = virt_to_phys(s - off) + off;
-    while (n) {
-        len = min(n, PAGE_SIZE - (pa % PAGE_SIZE));
-        func(pa, len);
-        n -= len;
-        pa += len;
-    }
+static void debug_print(const void *s, size_t n, void (*func)(uintptr_t, size_t))
+{
+	func(s, n);
 }
 
 void debug_print_console(const void *s, size_t n)

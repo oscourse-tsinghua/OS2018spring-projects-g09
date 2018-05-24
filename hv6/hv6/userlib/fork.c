@@ -12,7 +12,8 @@ static void dup_pt(pid_t pid, pn_t pt, size_t n)
         pn_t pn, frame;
         uintptr_t va;
 
-        entry = uvpt[n + i];
+        /// entry = uvpt[n + i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
         perm = entry & PTE_PERM_MASK;
@@ -63,7 +64,8 @@ static void dup_pd(pid_t pid, pn_t pd, size_t n)
         pte_t entry;
         pn_t pt;
 
-        entry = uvpd[n + i];
+        /// entry = uvpd[n + i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
         pt = find_free_page();
@@ -82,7 +84,8 @@ static void dup_pdpt(pid_t pid, pn_t pdpt, size_t n)
         pte_t entry;
         pn_t pd;
 
-        entry = uvpdpt[n + i];
+        /// entry = uvpdpt[n + i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
         pd = find_free_page();
@@ -103,14 +106,16 @@ static void dup_pml4(pid_t pid, pn_t pml4)
         pte_t entry, perm;
         pn_t pn, pdpt;
 
-        entry = uvpml4[i];
+        /// entry = uvpml4[i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
 
         perm = entry & PTE_PERM_MASK;
         /* uvpt */
         if (PTE_ADDR(entry) == cr3) {
-            assert(i == UVPML4_INDEX, "must be the uvpml4 index");
+            /// assert(i == UVPML4_INDEX, "must be the uvpml4 index");
+            while(1);
             r = sys_map_pml4(pid, i, perm);
             assert(r == 0, "sys_map_pml4");
             continue;

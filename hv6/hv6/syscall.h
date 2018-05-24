@@ -64,4 +64,6 @@
 // called by kernel
 void init_syscalls();
 
+extern void *syscalls[];
+
 #endif

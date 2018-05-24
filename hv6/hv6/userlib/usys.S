@@ -11,6 +11,14 @@
 #define SYSCALL(sym)		\
 .global	sys_##sym;			\
 sys_##sym:					\
+	ld		a7, is_user_mode; \
+	bnez	a7, ecall_sys_##sym; \
+	j		direct_sys_##sym; \
+ecall_sys_##sym:			\
+	li		a7, SYS_##sym;	\
+	ecall;					\
+	ret;					\
+direct_sys_##sym:			\
 	ld		a7, ulib_syscalls;	\
 	addi	a7,a7,8*SYS_##sym;	\
 	ld		a7, 0(a7);			\

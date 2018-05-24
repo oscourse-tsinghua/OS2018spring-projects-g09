@@ -45,11 +45,13 @@
 #define SO_TYPE 0x1008
 
 extern void** ulib_syscalls;
+extern int is_user_mode;
+extern uintptr_t cr3_value;
 
 noreturn void sys_debug_exit(int);
-void sys_debug_print_console(physaddr_t addr, size_t len);
-void sys_debug_print_screen(physaddr_t addr, size_t len);
-int sys_debug_dmesg(physaddr_t addr, size_t len, size_t offset);
+void sys_debug_print_console(uintptr_t addr, size_t len);
+void sys_debug_print_screen(uintptr_t addr, size_t len);
+int sys_debug_dmesg(uintptr_t addr, size_t len, size_t offset);
 
 int sys_map_page_desc(pid_t pid, pn_t pt, size_t index, size_t n, pte_t perm);
 int sys_map_pml4(pid_t pid, size_t index, pte_t perm);

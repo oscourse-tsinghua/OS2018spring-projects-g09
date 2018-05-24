@@ -17,10 +17,14 @@ noreturn void fs_serve(void);
 noreturn void enter_user_mode(void (*fn)());
 
 void** ulib_syscalls;
+int is_user_mode;
+uintptr_t cr3_value;
 
 void ulib_init(void* _ulib_syscalls[], void (*fn)())
 {
 	ulib_syscalls = _ulib_syscalls;
+    is_user_mode = 0;
+    cr3_value = rcr3();
 
     pid_t pid;
     int r;
@@ -31,7 +35,7 @@ void ulib_init(void* _ulib_syscalls[], void (*fn)())
 
     /* set the pfn of the first page */
     assert(upages[0].type == PAGE_TYPE_X86_PML4, "page 0 must be the page table root of init");
-    pfn_pages = rcr3() / PAGE_SIZE;
+    pfn_pages = cr3_value / PAGE_SIZE;
     /* safe to use getpid after setting pfn_pages */
     pid = getpid();
     libs_cprintf("ulib_init pid = %d\n", pid);
@@ -50,7 +54,7 @@ void ulib_init(void* _ulib_syscalls[], void (*fn)())
 
         va = UPROCS_START + i * PAGE_SIZE;
         pt = page_walk(va);
-        r = sys_map_proc(pid, pt, PT_INDEX(va), i, PTE_P);
+        r = sys_map_proc(pid, pt, PT_INDEX(va), i, PTE_P|PTE_U|PTE_R);
         assert(r == 0, "sys_map_proc");
     }
 
@@ -63,7 +67,7 @@ void ulib_init(void* _ulib_syscalls[], void (*fn)())
 
         va = UDEVS_START + i * PAGE_SIZE;
         pt = page_walk(va);
-        r = sys_map_dev(pid, pt, PT_INDEX(va), i, PTE_P);
+        r = sys_map_dev(pid, pt, PT_INDEX(va), i, PTE_P|PTE_U|PTE_R);
         assert(r == 0, "sys_map_dev");
     }
 
@@ -76,13 +80,14 @@ void ulib_init(void* _ulib_syscalls[], void (*fn)())
 
         va = UFILES_START + i * PAGE_SIZE;
         pt = page_walk(va);
-        r = sys_map_file(pid, pt, PT_INDEX(va), i, PTE_P);
+        r = sys_map_file(pid, pt, PT_INDEX(va), i, PTE_P|PTE_U|PTE_R);
         assert(r == 0, "sys_map_file");
     }
 
     /* set up syscall interception */
     /// linux_init();
 
+    is_user_mode = 1;
     enter_user_mode(fn);
 }
 
@@ -169,7 +174,7 @@ noreturn void panic(const char *fmt, ...)
 
 pid_t getpid(void)
 {
-    return upages[phys_to_pn(rcr3())].pid;
+    return upages[phys_to_pn(cr3_value)].pid;
 }
 
 char *gets(char *buf, size_t max)
@@ -365,7 +370,7 @@ pn_t page_walk(uintptr_t va)
     pte_t perm = PTE_P | PTE_W | PTE_R;
     int r;
 
-    pml4_pn = phys_to_pn(rcr3());
+    pml4_pn = phys_to_pn(cr3_value);
     pml4 = get_page(pml4_pn);
     pml4_index = PML4_INDEX(va);
     entry = pml4[pml4_index];

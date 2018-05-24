@@ -357,12 +357,14 @@ static void dump_regs(RISCVCPUState *s)
     printf(" cycles=%" PRId64, s->insn_counter);
     printf("\n");
 #if 1
-    printf(" mideleg=");
+    printf("mideleg=");
     print_target_ulong(s->mideleg);
     printf(" mie=");
     print_target_ulong(s->mie);
     printf(" mip=");
     print_target_ulong(s->mip);
+    printf(" stvec=");
+    print_target_ulong(s->stvec);
     printf("\n");
 #endif
 }
@@ -543,7 +545,7 @@ static int get_phys_addr(RISCVCPUState *s,
                 }
             } else {
                 if (!(pte & PTE_U_MASK)) {
-                    if (OS_DEBUGMODE) fprintf(stderr, "get_phys_addr[3.4]\n");
+                    if (OS_DEBUGMODE) fprintf(stderr, "get_phys_addr[3.4] xwr = 0x%x i = %d\n", xwr, i);
                     return -1;
                 }
             }
@@ -1390,6 +1392,10 @@ static void set_priv(RISCVCPUState *s, int priv)
 static void raise_exception2(RISCVCPUState *s, uint32_t cause,
                              target_ulong tval)
 {
+    // if (OS_DEBUGMODE) {
+    //     log_printf("raise_exception2[]: cause=0x%08x tval=0x", cause); print_target_ulong(tval); log_printf("\n");
+    // }
+
     BOOL mdeleg,sdeleg;
     target_ulong causel;
     
@@ -1415,6 +1421,7 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
         if (cause == CAUSE_SUPERVISOR_ECALL || cause == CAUSE_ILLEGAL_INSTRUCTION)
             flag = 0;
 #endif
+        if (cause == CAUSE_USER_ECALL) flag = 0;
         if (flag) {
             log_printf("raise_exception: cause=0x%08x tval=0x", cause);
 #ifdef CONFIG_LOGFILE
@@ -1433,8 +1440,10 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
         /* delegate the exception to the supervisor priviledge */
         if (isInterrupt)
             mdeleg = (s->mideleg >> (cause & (MAX_XLEN - 1))) & 1;
-        else
+        else {
             mdeleg = (s->medeleg >> cause) & 1;
+            // if (OS_DEBUGMODE) log_printf("[here] s->medeleg = %d cause = %d (s->medeleg >> cause) = %d\n", s->medeleg, cause, (s->medeleg >> cause));
+        }
     } else {
         mdeleg = 0;
     }
@@ -1445,14 +1454,19 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
         else
             sdeleg = (s->sedeleg >> cause) & 1;
     } else {
-        mdeleg = 0;
+        sdeleg = 0;
     }
+    // if (OS_DEBUGMODE) {
+    //     log_printf("(s->sedeleg >> cause) = %d\n", (s->sedeleg >> cause));
+    //     log_printf("mdeleg = %d sdeleg = %d\n", mdeleg, sdeleg);
+    // }
     
     causel = cause & 0x7fffffff;
     if (isInterrupt)
         causel |= (target_ulong)1 << (s->cur_xlen - 1);
     
     if (sdeleg && mdeleg) {
+        // if (OS_DEBUGMODE) log_printf("[1]\n");
         s->ucause = causel;
         s->uepc = s->pc;
         s->utval = tval;
@@ -1465,6 +1479,7 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
         else if(s->utvec&3==1)//Vectored
             s->pc = (s->stvec&~3)+4*causel;
     } else if (mdeleg) {
+        // if (OS_DEBUGMODE) log_printf("[2]\n");
         s->scause = causel;
         s->sepc = s->pc;
         s->stval = tval;
@@ -1479,6 +1494,7 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
         else if(s->stvec&3==1)//Vectored
             s->pc = (s->stvec&~3)+4*causel;
     } else {
+        // if (OS_DEBUGMODE) log_printf("[3]\n");
         s->mcause = causel;
         s->mepc = s->pc;
         s->mtval = tval;
@@ -1493,6 +1509,9 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
         else if(s->mtvec&3==1)//Vectored
             s->pc = (s->mtvec&~3)+4*causel;
     }
+    // if (OS_DEBUGMODE) {
+    //     log_printf("s->pc = 0x%llx\n", s->pc);
+    // }
 }
 
 static void raise_exception(RISCVCPUState *s, uint32_t cause)
@@ -1625,9 +1644,10 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
     timeout = s->insn_counter + n_cycles;
 
     // FIXME
-	fprintf(stderr, "s->insn_counter = %lld s->pc = 0x%x\n", s->insn_counter, s->pc);
+	fprintf(stderr, "s->insn_counter = %lld s->pc = 0x%llx\n", s->insn_counter, s->pc);
 	if (s->power_down_flag) {
 		fprintf(stderr, "riscvemu exit because of power down\n");
+        dump_regs(s);
 		exit(1);
 	}
 
@@ -1639,6 +1659,7 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
 	}
 	if (insn_counter_count > 10) {
 		fprintf(stderr, "riscvemu exit because of s->pc always same\n");
+        dump_regs(s);
 		exit(1);
 	}
     static uint64_t last_pc = 0, pc_count = 0;
@@ -1649,11 +1670,13 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
 	}
 	if (pc_count > 10) {
 		fprintf(stderr, "riscvemu exit because of s->insn_counter always same\n");
+        dump_regs(s);
 		exit(1);
 	}
 
 	if (s->insn_counter > 200000000) {
 		fprintf(stderr, "riscvemu exit because of s->insn_counter = %d is too large\n", s->insn_counter);
+        dump_regs(s);
 		exit(1);
 	}
 

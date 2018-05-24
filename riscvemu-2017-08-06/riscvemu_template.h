@@ -865,6 +865,9 @@ static void no_inline glue(riscv_cpu_interp, XLEN)(RISCVCPUState *s,
             case 3: /* ld */
                 {
                     uint64_t rval;
+                    if (OS_DEBUGMODE) {
+                        // fprintf(stderr, "addr = 0x%llx\n", addr);
+                    }
                     if (target_read_u64(s, &rval, addr))
                         goto mmu_exception;
                     val = (int64_t)rval;

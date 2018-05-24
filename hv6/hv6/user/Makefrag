@@ -5,14 +5,17 @@ HV6_INIT_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(HV6_I
 
 -include $(HV6_INIT_OBJS:.o=.d)
 
-$(HV6_INIT_OBJS): CFLAGS += -I hv6 -I hv6/user/lwip/include -I hv6/user/fs -I hv6/user -I hv6/user/linux
+$(HV6_INIT_OBJS): CFLAGS += -I hv6 -I hv6/user -I hv6/userlib -I hv6/userlib/fs
 
 $(O)/hv6/initbin.o: $(O)/hv6/init $(O)/hv6/ulib
 
 $(O)/hv6/initbin.o: CFLAGS += -I $(O)/hv6
 
-$(O)/hv6/init: $(HV6_INIT_OBJS)
+$(O)/hv6/init: $(HV6_INIT_OBJS) $(O)/hv6/user/ustub.o
 	$(QUIET_LD_USER)$(LD) -o $@ $^
+
+$(O)/hv6/user/ustub.S: $(O)/hv6/ulib
+	$(QUIET_GEN)$(NM) -n $< | hv6/user/genustub.py > $@
 
 $(O)/hv6/%.o: $(O)/hv6/%.S
 	$(QUIET_CC_USER)$(CC) -o $@ -c $(CFLAGS) $<

@@ -17,39 +17,54 @@ static int sys_nop(void)
     return -ENOSYS;
 }
 
-static void *debug_print_check(physaddr_t addr, size_t len)
+//static void *debug_print_check(physaddr_t addr, size_t len)
+//{
+//    void *p = pa2kva(addr);
+//    pn_t pn;
+//
+//    assert(len <= PAGE_SIZE - addr % PAGE_SIZE, "must be within a page");
+//    pn = pfn_to_pn(addr / PAGE_SIZE);
+//    assert(is_page_pid(pn, current), "must be from current");
+//    assert(is_page_type(pn, PAGE_TYPE_FRAME), "must be frame");
+//
+//    return p;
+//}
+
+//static void sys_debug_print_console(physaddr_t addr, size_t len)
+//{
+//    console_write(debug_print_check(addr, len), len);
+//}
+//
+//static void sys_debug_print_screen(physaddr_t addr, size_t len)
+//{
+//    cga_write(pa2kva(CGA_START), debug_print_check(addr, len), len);
+//}
+//
+//static int sys_debug_dmesg(physaddr_t addr, size_t len, off_t offset)
+//{
+//    pn_t pn;
+//
+//    assert(len <= PAGE_SIZE - addr % PAGE_SIZE, "sys_debug_dmesg");
+//    pn = pfn_to_pn(addr / PAGE_SIZE);
+//    assert(is_page_pid(pn, current), "must be from current");
+//    assert(is_page_type(pn, PAGE_TYPE_FRAME), "must be frame");
+//
+//    return syslog_read(pa2kva(addr), len, offset);
+//}
+
+static void sys_debug_print_console(uintptr_t addr, size_t len)
 {
-    void *p = pa2kva(addr);
-    pn_t pn;
-
-    assert(len <= PAGE_SIZE - addr % PAGE_SIZE, "must be within a page");
-    pn = pfn_to_pn(addr / PAGE_SIZE);
-    assert(is_page_pid(pn, current), "must be from current");
-    assert(is_page_type(pn, PAGE_TYPE_FRAME), "must be frame");
-
-    return p;
+    console_write(addr, len);
 }
 
-static void sys_debug_print_console(physaddr_t addr, size_t len)
+static void sys_debug_print_screen(uintptr_t addr, size_t len)
 {
-    console_write(debug_print_check(addr, len), len);
+    cga_write(pa2kva(CGA_START), addr, len);
 }
 
-static void sys_debug_print_screen(physaddr_t addr, size_t len)
+static int sys_debug_dmesg(uintptr_t addr, size_t len, off_t offset)
 {
-    cga_write(pa2kva(CGA_START), debug_print_check(addr, len), len);
-}
-
-static int sys_debug_dmesg(physaddr_t addr, size_t len, off_t offset)
-{
-    pn_t pn;
-
-    assert(len <= PAGE_SIZE - addr % PAGE_SIZE, "sys_debug_dmesg");
-    pn = pfn_to_pn(addr / PAGE_SIZE);
-    assert(is_page_pid(pn, current), "must be from current");
-    assert(is_page_type(pn, PAGE_TYPE_FRAME), "must be frame");
-
-    return syslog_read(pa2kva(addr), len, offset);
+	while(1);
 }
 
 /*

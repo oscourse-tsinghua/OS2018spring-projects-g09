@@ -144,10 +144,6 @@ static uintptr_t load_elf(pid_t pid, void *p)
             if (off >= filesz)
                 continue;
             memcpy(get_page(frame), binary + off, min(filesz - off, (size_t)PAGE_SIZE));
-
-            if (0x10466 <= va && va <= 0x10466+PAGE_SIZE) {
-            	libs_cprintf("[debug] 0x10466 -> 0x%x\n", 0x10466-va+get_page(frame));
-            }
         }
     }
 
@@ -185,7 +181,7 @@ static void user_init(pid_t pid)
     for (i = 0; i < n; ++i) {
         pn_t pt;
         uintptr_t va;
-        pte_t perm = PTE_P | PTE_R;
+        pte_t perm = PTE_P | PTE_R | PTE_U;
 
         va = UPAGES_START + i * PAGE_SIZE;
         pt = page_walk(pid, va);
@@ -240,9 +236,6 @@ static pn_t page_walk(pid_t pid, uintptr_t va)
     } else {
         pdpt_pn = pfn_to_pn(PTE_ADDR(entry) / PAGE_SIZE);
     }
-    if (va == 0x8020a7d2) {
-    	libs_cprintf("pml4_index = %d pml4[pml4_index] = 0x%x\n", pml4_index, pml4[pml4_index]);
-    }
 
     pdpt = get_page(pdpt_pn);
     pdpt_index = PDPT_INDEX(va);
@@ -286,6 +279,10 @@ static void setup_kernel_map(pid_t pid)
 		assert((va - (uintptr_t)pages) % PAGE_SIZE == 0, "(va - pages) % PAGE_SIZE != 0");
 		pte_t* pt_page = get_page(pt);
 		pt_page[PT_INDEX(va)] = ((va >> PAGE_SHIFT) << PTE_PFN_SHIFT) | perm;
+		enum page_type type = get_page_desc(get_proc(pid)->page_table_root)->type;
+		if (type == PAGE_TYPE_X86_PML4 || type == PAGE_TYPE_X86_PDPT || type == PAGE_TYPE_X86_PD || type == PAGE_TYPE_X86_PT) {
+			pt_page[PT_INDEX(va)] = ((va >> PAGE_SHIFT) << PTE_PFN_SHIFT) | perm | PTE_U;
+		}
 	}
 }
 

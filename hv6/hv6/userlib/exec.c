@@ -232,7 +232,8 @@ static void clear_pt(pn_t pt, size_t n)
         pte_t entry;
         pn_t pn;
 
-        entry = uvpt[n + i];
+        /// entry = uvpt[n + i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
         pn = phys_to_pn(PTE_ADDR(entry));
@@ -252,7 +253,8 @@ static void clear_pd(pn_t pd, size_t n)
         pte_t entry;
         pn_t pn;
 
-        entry = uvpd[n + i];
+        /// entry = uvpd[n + i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
         pn = phys_to_pn(PTE_ADDR(entry));
@@ -272,7 +274,8 @@ static void clear_pdpt(pn_t pdpt, size_t n)
         pte_t entry;
         pn_t pn;
 
-        entry = uvpdpt[n + i];
+        /// entry = uvpdpt[n + i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
         pn = phys_to_pn(PTE_ADDR(entry));
@@ -285,7 +288,7 @@ static void clear_pdpt(pn_t pdpt, size_t n)
 
 static void clear_lower_pml4(void)
 {
-    pn_t pml4 = phys_to_pn(rcr3());
+    pn_t pml4 = phys_to_pn(cr3_value);
     size_t i;
     int r;
 
@@ -293,7 +296,8 @@ static void clear_lower_pml4(void)
         pte_t entry;
         pn_t pn;
 
-        entry = uvpml4[i];
+        /// entry = uvpml4[i];
+        while(1);
         if (!(entry & PTE_P))
             continue;
 

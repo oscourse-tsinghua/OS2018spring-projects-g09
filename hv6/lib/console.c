@@ -46,13 +46,17 @@ int console_getc(void)
 
 void console_write(const char *s, size_t n)
 {
-    struct console_device *dev;
-
-    SLIST_FOREACH(dev, &devs, link)
-    {
-        if (dev->write)
-            dev->write(dev->arg, s, n);
-    }
+	ssize_t i;
+	for(i = 0; i < n; i ++) {
+		libs_cons_putc(s[i]);
+	}
+//    struct console_device *dev;
+//
+//    SLIST_FOREACH(dev, &devs, link)
+//    {
+//        if (dev->write)
+//            dev->write(dev->arg, s, n);
+//    }
 }
 
 void console_register(struct console_device *dev)
