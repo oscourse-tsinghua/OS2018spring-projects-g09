@@ -407,7 +407,8 @@ pn_t page_walk(uintptr_t va)
     pt = get_page(pt_pn);
     pt_index = PT_INDEX(va);
     entry = pt[pt_index];
-    assert(!(pte_valid(entry)), "this address already mapped");
+    /// assert(!(pte_valid(entry)), "this address(0x%llx) already mapped", va);
+    pt[pt_index] = 0;
 
     return pt_pn;
 }

@@ -142,6 +142,8 @@ int kill(pid_t);
 pid_t wait(void);
 void yield(void);
 
+int exec_in_mem(void* data);
+
 int exec(const char *path, char *argv[]);
 int execl(const char *path, const char *arg0, ...);
 int fexec(int fd, char *argv[]);

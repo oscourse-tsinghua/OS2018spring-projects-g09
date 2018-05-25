@@ -1,5 +1,7 @@
 #include "user.h"
 
+extern char* _uprogs_hello_start[];
+
 void line(char *buf, size_t n) {
 	char ch;
 	size_t off = 0;
@@ -31,5 +33,14 @@ int main() {
 	yield();
 	cprintf("after yield getpid() = %d\n", getpid());
 
+	pid = fork();
+	if (pid == 0) {
+		cprintf("Info: running hello uprog\n");
+		exec_in_mem(_uprogs_hello_start);
+		cprintf("Error: this code should not reach\n");
+	}
+	yield();
+
+	cprintf("Info: init process exit.\n");
     while(1);
 }

@@ -1431,6 +1431,8 @@ static void raise_exception2(RISCVCPUState *s, uint32_t cause,
 #endif
             log_printf("\n");
             dump_regs(s);
+            exit(1);
+            log_printf("raise_exception: exit here\n");
         }
     }
 #endif

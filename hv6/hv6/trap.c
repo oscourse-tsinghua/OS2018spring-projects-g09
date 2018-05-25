@@ -135,7 +135,7 @@ void exception_handler(struct trap_frame *tf) {
             libs_cprintf("Instruction access fault\n");
             break;
         case CAUSE_ILLEGAL_INSTRUCTION:
-            libs_cprintf("Illegal instruction\n");
+            libs_cprintf("Illegal instruction: epc = 0x%llx\n", tf->epc);
             break;
         case CAUSE_BREAKPOINT:
             libs_cprintf("Breakpoint\n");
