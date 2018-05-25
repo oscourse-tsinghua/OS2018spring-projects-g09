@@ -125,7 +125,7 @@ int syscall(struct trap_frame *tf) {
 }
 
 void exception_handler(struct trap_frame *tf) {
-    int ret;
+    int ret = 0;
     switch (tf->cause) {
         case CAUSE_MISALIGNED_FETCH:
             libs_cprintf("Instruction address misaligned\n");
@@ -154,12 +154,12 @@ void exception_handler(struct trap_frame *tf) {
         case CAUSE_USER_ECALL:
             //libs_cprintf("Environment call from U-mode\n");
             tf->epc += 4;
-            syscall(tf);
+            ret = syscall(tf);
             break;
         case CAUSE_SUPERVISOR_ECALL:
             libs_cprintf("Environment call from S-mode\n");
             tf->epc += 4;
-            syscall(tf);
+            ret = syscall(tf);
             break;
         case CAUSE_HYPERVISOR_ECALL:
             libs_cprintf("Environment call from H-mode\n");
@@ -208,6 +208,7 @@ void exception_handler(struct trap_frame *tf) {
             print_trapframe(tf);
             break;
     }
+    tf->gpr.a0 = ret;
 }
 
 static inline void trap_dispatch(struct trap_frame* tf) {

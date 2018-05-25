@@ -67,6 +67,13 @@ static int sys_debug_dmesg(uintptr_t addr, size_t len, off_t offset)
 	while(1);
 }
 
+static int sys_debug_getchar()
+{
+	int c;
+	while ((c = libs_cons_getc()) <= 0) /* do nothing */;
+	return c;
+}
+
 /*
 void *syscalls[NR_syscalls] = {
         [0 ... NR_syscalls - 1] = sys_nop,
@@ -188,5 +195,6 @@ void init_syscalls()
 	syscalls[SYS_debug_print_console] = sys_debug_print_console;
 	syscalls[SYS_debug_print_screen] = sys_debug_print_screen;
 	syscalls[SYS_debug_dmesg] = sys_debug_dmesg;
-	syscalls[SYS_debug_sysctl] = sys_debug_sysctl;
+	///syscalls[SYS_debug_sysctl] = sys_debug_sysctl;
+	syscalls[SYS_debug_getchar] = sys_debug_getchar;
 }

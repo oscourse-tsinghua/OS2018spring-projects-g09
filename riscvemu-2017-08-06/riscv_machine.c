@@ -144,6 +144,7 @@ static void htif_handle_cmd(RISCVMachine *s)
     } else if (device == 1 && cmd == 0) {
         /* request keyboard interrupt */
         s->htif_tohost = 0;
+        s->htif_fromhost = ((uint64_t)1 << 56) | ((uint64_t)0 << 48) | getchar();
     } else {
         printf("HTIF: unsupported tohost=0x%016" PRIx64 "\n", s->htif_tohost);
     }

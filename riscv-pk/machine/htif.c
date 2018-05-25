@@ -7,7 +7,7 @@
 extern uint64_t __htif_base;
 volatile extern uint64_t tohost;
 volatile extern uint64_t fromhost;
-volatile int htif_console_buf;
+volatile int htif_console_buf = 0;
 static spinlock_t htif_lock = SPINLOCK_INIT;
 uintptr_t htif;
 
@@ -44,15 +44,26 @@ static void __set_tohost(uintptr_t dev, uintptr_t cmd, uintptr_t data)
   tohost = TOHOST_CMD(dev, cmd, data);
 }
 
+// int htif_console_getchar()
+// {
+//   spinlock_lock(&htif_lock);
+//     __check_fromhost();
+//     int ch = htif_console_buf;
+//     if (ch >= 0) {
+//       htif_console_buf = -1;
+//       __set_tohost(1, 0, 0);
+//     }
+//   spinlock_unlock(&htif_lock);
+
+//   return ch - 1;
+// }
+
 int htif_console_getchar()
 {
   spinlock_lock(&htif_lock);
-    __check_fromhost();
-    int ch = htif_console_buf;
-    if (ch >= 0) {
-      htif_console_buf = -1;
-      __set_tohost(1, 0, 0);
-    }
+  __set_tohost(1, 0, 0);
+  __check_fromhost();
+  int ch = htif_console_buf;
   spinlock_unlock(&htif_lock);
 
   return ch - 1;

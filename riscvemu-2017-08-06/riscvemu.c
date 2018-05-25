@@ -76,27 +76,28 @@ static void term_exit(void)
 
 static void term_init(BOOL allow_ctrlc)
 {
-    struct termios tty;
+    // struct termios tty;
 
-    memset(&tty, 0, sizeof(tty));
-    tcgetattr (0, &tty);
-    oldtty = tty;
-    old_fd0_flags = fcntl(0, F_GETFL);
+    // memset(&tty, 0, sizeof(tty));
+    // tcgetattr (0, &tty);
+    // oldtty = tty;
+    // old_fd0_flags = fcntl(0, F_GETFL);
 
-    tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP
-                          |INLCR|IGNCR|ICRNL|IXON);
-    tty.c_oflag |= OPOST;
-    tty.c_lflag &= ~(ECHO|ECHONL|ICANON|IEXTEN);
-    if (!allow_ctrlc)
-        tty.c_lflag &= ~ISIG;
-    tty.c_cflag &= ~(CSIZE|PARENB);
-    tty.c_cflag |= CS8;
-    tty.c_cc[VMIN] = 1;
-    tty.c_cc[VTIME] = 0;
+    // tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP
+    //                       |INLCR|IGNCR|ICRNL|IXON);
+    // tty.c_oflag |= OPOST;
+    // //tty.c_lflag &= ~(ECHO|ECHONL|ICANON|IEXTEN);
+    // tty.c_lflag &= ~(ECHONL|ICANON|IEXTEN);
+    // // if (!allow_ctrlc)
+    // //     tty.c_lflag &= ~ISIG;
+    // tty.c_cflag &= ~(CSIZE|PARENB);
+    // tty.c_cflag |= CS8;
+    // tty.c_cc[VMIN] = 1;
+    // tty.c_cc[VTIME] = 0;
 
-    tcsetattr (0, TCSANOW, &tty);
+    // tcsetattr (0, TCSANOW, &tty);
 
-    atexit(term_exit);
+    // atexit(term_exit);
 }
 
 static void console_write(void *opaque, const uint8_t *buf, int len)
@@ -189,7 +190,7 @@ CharacterDevice *console_init(BOOL allow_ctrlc)
     s->stdin_fd = 0;
     /* Note: the glibc does not properly tests the return value of
        write() in printf, so some messages on stdout may be lost */
-    fcntl(s->stdin_fd, F_SETFL, O_NONBLOCK);
+    //fcntl(s->stdin_fd, F_SETFL, O_NONBLOCK);
 
     s->resize_pending = TRUE;
     global_stdio_device = s;

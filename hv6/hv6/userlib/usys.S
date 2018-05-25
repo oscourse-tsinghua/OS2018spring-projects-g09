@@ -76,7 +76,8 @@ SYSCALL(debug_exit)
 SYSCALL(debug_print_console)
 SYSCALL(debug_print_screen)
 SYSCALL(debug_dmesg)
-SYSCALL(debug_sysctl)
+/*///SYSCALL(debug_sysctl)*/
+SYSCALL(debug_getchar)
 
 .global	exec
 exec:

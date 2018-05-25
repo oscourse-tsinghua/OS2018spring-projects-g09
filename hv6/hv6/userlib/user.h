@@ -44,9 +44,13 @@
 #define SO_ERROR 0x1007
 #define SO_TYPE 0x1008
 
+///
 extern void** ulib_syscalls;
 extern int is_user_mode;
 extern uintptr_t cr3_value;
+
+int sys_debug_getchar();
+///
 
 noreturn void sys_debug_exit(int);
 void sys_debug_print_console(uintptr_t addr, size_t len);

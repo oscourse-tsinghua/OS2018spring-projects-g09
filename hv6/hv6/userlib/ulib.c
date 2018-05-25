@@ -883,11 +883,13 @@ const char *strerror(int err)
 
 uint32_t sys_now(void)
 {
-    static uint64_t tsc_khz;
-
-    if (!tsc_khz)
-        tsc_khz = sys_debug_sysctl(SYSCTL_TSC_KHZ);
-    return rdtsc() / tsc_khz;
+	return 0;
+///
+//    static uint64_t tsc_khz;
+//
+//    if (!tsc_khz)
+//        tsc_khz = sys_debug_sysctl(SYSCTL_TSC_KHZ);
+//    return rdtsc() / tsc_khz;
 }
 
 void microdelay(uint64_t delay)

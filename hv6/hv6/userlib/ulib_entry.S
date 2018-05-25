@@ -32,4 +32,5 @@ _start:
 .balign	PAGE_SIZE
 .global	ulib_stack_top
 	.space	SZ_64K
+	.space	SZ_64K
 ulib_stack_top:

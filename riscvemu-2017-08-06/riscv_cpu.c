@@ -525,7 +525,7 @@ static int get_phys_addr(RISCVCPUState *s,
         //printf("pte=0x%08" PRIx64 "\n", pte);
         if (!(pte & PTE_V_MASK)) {
             if (OS_DEBUGMODE) {
-                fprintf(stderr, "get_phys_addr[3.1] i = %d PTE_V_MASK = %d pte = 0x%x\n", i, PTE_V_MASK, pte);
+                fprintf(stderr, "get_phys_addr[3.1] i = %d PTE_V_MASK = %d pte = 0x%x vaddr = 0x%llx\n", i, PTE_V_MASK, pte, vaddr);
                 fprintf(stderr, "mode = %d levels = %d vaddr_shift = %d pte_idx = %d pte_addr = 0x%x\n", mode, levels, vaddr_shift, pte_idx, pte_addr);
             }
             return -1; /* invalid PTE */
