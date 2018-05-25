@@ -355,7 +355,7 @@ int is_page_mapped(uintptr_t va)
 }
 */
 
-static inline void *get_page(pn_t pn)
+void *get_page(pn_t pn)
 {
     return (pn + pfn_pages)*PAGE_SIZE;
 }
@@ -501,7 +501,9 @@ void protect_pages(uintptr_t va, size_t n, pte_t perm)
 pn_t phys_to_pn(physaddr_t pa)
 {
     pn_t pfn = pa / PAGE_SIZE;
+    //cprintf("phys_to_pn pa = 0x%llx pfn = %d pfn_pages = %d\n", pa, pfn, pfn_pages);
     assert(pfn >= pfn_pages && pfn < pfn_pages + NPAGE, "pa must be in bounds");
+    //cprintf("=============\n");
     return pfn - pfn_pages;
 }
 

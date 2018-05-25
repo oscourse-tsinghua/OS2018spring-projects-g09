@@ -16,6 +16,7 @@ int sys_alloc_pd(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm);
 int sys_alloc_pt(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm);
 int sys_alloc_frame(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm);
 int sys_copy_frame(pn_t from, pid_t pid, pn_t to);
+int sys_map_page(pid_t pid, pn_t from_pn, size_t index, uintptr_t pa, pte_t perm, enum page_type from_type);
 int sys_protect_frame(pn_t pt, size_t index, pn_t frame, pte_t perm);
 
 int sys_free_pdpt(pn_t from, size_t index, pn_t to);

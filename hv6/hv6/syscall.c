@@ -194,7 +194,8 @@ void init_syscalls()
 	syscalls[SYS_debug_exit] = sys_debug_exit;
 	syscalls[SYS_debug_print_console] = sys_debug_print_console;
 	syscalls[SYS_debug_print_screen] = sys_debug_print_screen;
-	syscalls[SYS_debug_dmesg] = sys_debug_dmesg;
+	///syscalls[SYS_debug_dmesg] = sys_debug_dmesg;
 	///syscalls[SYS_debug_sysctl] = sys_debug_sysctl;
+	syscalls[SYS_map_page] = sys_map_page;
 	syscalls[SYS_debug_getchar] = sys_debug_getchar;
 }

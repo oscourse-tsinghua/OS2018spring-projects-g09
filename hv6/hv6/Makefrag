@@ -59,6 +59,7 @@ HV6_KERNEL_SRCS +=             \
         kernel/pic.c           \
         kernel/tsc.c           \
         kernel/xapic.c         \
+        kernel/switch.S        \
         drivers/acpi.c         \
         drivers/cga.c          \
         drivers/pci.c          \

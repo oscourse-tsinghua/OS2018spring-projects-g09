@@ -1,5 +1,5 @@
 HV6_INIT_SRCS :=               \
-        hv6/user/empty.c        \
+        hv6/user/init.c        \
         hv6/user/initcode.S		\
 
 HV6_INIT_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(HV6_INIT_SRCS))))

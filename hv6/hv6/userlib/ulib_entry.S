@@ -4,18 +4,9 @@
 
 .global	_start
 _start:
-	addi	sp,sp,-16
-	sd		s0,8(sp)
-	sd		ra,0(sp)
-	addi	s0,sp,16
-
+	csrw	sscratch, sp
 	la		sp, ulib_stack_top
 	call	ulib_init
-	mv		sp, s0
-
-	ld		s0,-8(sp)
-	ld		ra,-16(sp)
-	ret
 
 #if 0
 _start:

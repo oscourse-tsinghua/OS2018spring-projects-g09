@@ -43,6 +43,7 @@ SYSCALL(reclaim_page)
 SYSCALL(set_proc_name)
 SYSCALL(set_runnable)
 SYSCALL(switch)
+SYSCALL(clone)
 SYSCALL(kill)
 SYSCALL(reap)
 SYSCALL(reparent)
@@ -75,8 +76,9 @@ SYSCALL(reclaim_port)
 SYSCALL(debug_exit)
 SYSCALL(debug_print_console)
 SYSCALL(debug_print_screen)
-SYSCALL(debug_dmesg)
+/*///SYSCALL(debug_dmesg)*/
 /*///SYSCALL(debug_sysctl)*/
+SYSCALL(map_page)
 SYSCALL(debug_getchar)
 
 .global	exec

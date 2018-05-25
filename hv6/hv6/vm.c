@@ -186,6 +186,12 @@ int sys_alloc_frame(pid_t pid, pn_t from, size_t index, pn_t to, pte_t perm)
     return alloc_page_table_page(pid, from, index, to, perm, PAGE_TYPE_X86_PT, PAGE_TYPE_FRAME);
 }
 
+int sys_map_page(pid_t pid, pn_t from_pn, size_t index, uintptr_t pa, pte_t perm, enum page_type from_type)
+{
+	// libs_cprintf("sys_map_page pa = 0x%llx\n", pa);
+	return map_page(pid, from_pn, index, pa/PAGE_SIZE, perm, from_type);
+}
+
 /*
  * We need to_pn as a parameter; otherwise it's hard to check
  * if a given entry has a valid pn.

@@ -4,6 +4,7 @@
 #include <uapi/bitset.h>
 #include <uapi/errno.h>
 #include <uapi/pci.h>
+#include <uapi/machine/trap.h>
 #include "param.h"
 
 #define NULLPID 0

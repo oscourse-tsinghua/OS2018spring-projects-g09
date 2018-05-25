@@ -49,7 +49,10 @@ extern void** ulib_syscalls;
 extern int is_user_mode;
 extern uintptr_t cr3_value;
 
+void *get_page(pn_t pn);
+
 int sys_debug_getchar();
+int sys_map_page(pid_t pid, pn_t from_pn, size_t index, uintptr_t pa, pte_t perm, enum page_type from_type);
 ///
 
 noreturn void sys_debug_exit(int);
@@ -77,18 +80,8 @@ int sys_free_pt(pn_t from, size_t index, pn_t to);
 int sys_free_frame(pn_t from, size_t index, pn_t to);
 int sys_reclaim_page(pn_t pn);
 
-/* avoid a ret to ensure a child process to return to the right place */
-static __always_inline int sys_clone(pid_t pid, pn_t pml4, pn_t stack, pn_t hvm)
-{
-    int r;
-
-    /// asm volatile("vmcall"
-    //              : "=a"(r)
-    //              : "D"(pid), "S"(pml4), "d"(stack), "c"(hvm), "a"(SYS_clone)
-    //              : "cc", "memory");
-    while(1);
-    return r;
-}
+/*??? avoid a ret to ensure a child process to return to the right place */
+int sys_clone(pid_t pid, pn_t pml4, pn_t stack, pn_t hvm);
 int sys_set_proc_name(uint64_t name0, uint64_t name1);
 int sys_set_runnable(pid_t pid);
 int sys_switch(pid_t pid);

@@ -15,12 +15,21 @@ void line(char *buf, size_t n) {
 }
 
 int main() {
-	char buf[1024];
 	pid_t pid = getpid();
-	cprintf("Hello World\n");
+	cprintf("Hello World pid = %d\n", pid);
 
-	line(buf, sizeof(buf));
-	cprintf("Line:%s\n", buf);
+////	cprintf("Input Line:");
+////	line(buf, sizeof(buf));
+////	cprintf("Your Input:%s\n", buf);
+//
+	pid = fork();
+	cprintf("fork pid = %d\n", pid);
+	if (pid == 0) {
+		exit();
+	}
+
+	yield();
+	cprintf("after yield getpid() = %d\n", getpid());
 
     while(1);
 }

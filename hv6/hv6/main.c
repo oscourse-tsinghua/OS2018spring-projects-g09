@@ -57,7 +57,8 @@ void main(void)
 
     libs_cprintf("run_current:\n");
     write_csr(dcsr,1);//open RISCVEMU debug
-    run_current();
+    // run_current();
+    hvm_run_user_init(get_page(get_proc(INITPID)->hvm));
     panic(NULL);
 }
 
@@ -269,12 +270,10 @@ static pn_t page_walk(pid_t pid, uintptr_t va)
 
 static void setup_kernel_map(pid_t pid)
 {
-	const uintptr_t KERNBASE = 0x80000000, KERNSZ = 100*(1<<20);
-	assert(KERNBASE % PAGE_SIZE == 0, "KERNBASE % PAGE_SIZE must be 0");
-	size_t off;
+	assert(KERNSTART % PAGE_SIZE == 0, "KERNBASE % PAGE_SIZE must be 0");
+	uintptr_t va;
 	pte_t perm = PTE_P | PTE_W | PTE_R | PTE_X;
-	for(off = 0; off < KERNSZ; off += PAGE_SIZE) {
-		uintptr_t va = KERNBASE + off;
+	for(va = KERNSTART; va < KERNEND; va += PAGE_SIZE) {
 		pn_t pt = page_walk(pid, va);
 		assert((va - (uintptr_t)pages) % PAGE_SIZE == 0, "(va - pages) % PAGE_SIZE != 0");
 		pte_t* pt_page = get_page(pt);

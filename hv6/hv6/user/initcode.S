@@ -4,7 +4,7 @@
 
 .global	_start
 _start:
-	la	sp, stack_top
+	;la	sp, stack_top
 	call	main
 
 .section .bss

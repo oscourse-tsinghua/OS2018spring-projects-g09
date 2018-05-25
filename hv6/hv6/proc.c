@@ -130,10 +130,14 @@ int clone_proc(pid_t pid, pn_t pml4, pn_t stack, pn_t hvm)
 
 int switch_proc(pid_t pid)
 {
-    if (!is_pid_valid(pid))
+    if (!is_pid_valid(pid)) {
+    	libs_cprintf("switch_proc[1]\n");
         return -ESRCH;
-    if (!is_proc_state(pid, PROC_RUNNABLE))
+    }
+    if (!is_proc_state(pid, PROC_RUNNABLE)) {
+    	libs_cprintf("switch_proc[2]\n");
         return -EINVAL;
+    }
 
     if (current != pid) {
         struct proc *old, *new;
@@ -152,6 +156,7 @@ int switch_proc(pid_t pid)
         }
         new->state = PROC_RUNNING;
         current = pid;
+        hvm_switch(get_page(old->hvm), get_page(new->hvm));
     }
 
     /* will call run_current() upon return */
@@ -219,21 +224,21 @@ int sys_kill(pid_t pid)
     return 0;
 }
 
-noreturn void run_current(void)
-{
-    struct proc *proc;
-    int launched;
-
-    proc = get_proc(current);
-    assert(proc->state == PROC_RUNNING, "current must be running");
-    launched = proc->launched;
-    proc->launched = 1;
-    hvm_switch(get_page(proc->hvm), get_page(proc->stack) + PAGE_SIZE,
-               kva2pa(get_page(proc->page_table_root)), ms_to_cycles(CONFIG_PREEMPT_TIMER),
-               launched);
-    while(1);
-    __builtin_unreachable();
-}
+//noreturn void run_current(void)
+//{
+//    struct proc *proc;
+//    int launched;
+//
+//    proc = get_proc(current);
+//    assert(proc->state == PROC_RUNNING, "current must be running");
+//    launched = proc->launched;
+//    proc->launched = 1;
+//    hvm_switch(get_page(proc->hvm), get_page(proc->stack) + PAGE_SIZE,
+//               kva2pa(get_page(proc->page_table_root)), ms_to_cycles(CONFIG_PREEMPT_TIMER),
+//               launched);
+//    while(1);
+//    __builtin_unreachable();
+//}
 
 int sys_set_proc_name(uint64_t name0, uint64_t name1)
 {
@@ -323,7 +328,8 @@ void preempt(void)
 {
     flush_current();
     switch_next();
-    run_current();
+    ///run_current();
+    while(1);
 }
 
 void fault(void)
@@ -335,5 +341,6 @@ void fault(void)
     proc->killed = 1;
     pr_info("fault: pid %ld killed\n", pid);
     switch_next();
-    run_current();
+    ///run_current();
+    while(1);
 }

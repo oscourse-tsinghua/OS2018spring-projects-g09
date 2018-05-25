@@ -2,7 +2,7 @@
 #include <libs/riscv.h>
 #include "user.h"
 
-static void dup_pt(pid_t pid, pn_t pt, size_t n)
+static void dup_pt(pid_t pid, pn_t pt, uintptr_t addr, uintptr_t ova)
 {
     size_t i;
     int r;
@@ -10,16 +10,22 @@ static void dup_pt(pid_t pid, pn_t pt, size_t n)
     for (i = 0; i < PTRS_PER_PT; ++i) {
         pte_t entry, perm;
         pn_t pn, frame;
+        pte_t* ptes = addr;
         uintptr_t va;
 
-        /// entry = uvpt[n + i];
-        while(1);
+        entry = ptes[i];
         if (!(entry & PTE_P))
             continue;
         perm = entry & PTE_PERM_MASK;
-        va = (n + i) * PAGE_SIZE;
+        va = ova|(i<<PT_SHIFT);
         if (va & BIT64(47))
             va |= BITMASK64(63, 48);
+
+        if (KERNSTART <= va && va < KERNEND) {
+			r = sys_map_page(pid, pt, i, va, perm, PAGE_TYPE_X86_PT);
+			assert(r == 0, "sys_map_page");
+        	continue;
+        }
 
         if (va >= UPAGES_START && va < UPAGES_END) {
             r = sys_map_page_desc(pid, pt, i, (va - UPAGES_START) / PAGE_SIZE, perm);
@@ -55,7 +61,7 @@ static void dup_pt(pid_t pid, pn_t pt, size_t n)
     }
 }
 
-static void dup_pd(pid_t pid, pn_t pd, size_t n)
+static void dup_pd(pid_t pid, pn_t pd, uintptr_t addr, uintptr_t va)
 {
     size_t i;
     int r;
@@ -63,19 +69,19 @@ static void dup_pd(pid_t pid, pn_t pd, size_t n)
     for (i = 0; i < PTRS_PER_PD; ++i) {
         pte_t entry;
         pn_t pt;
+        pte_t* ptes = addr;
 
-        /// entry = uvpd[n + i];
-        while(1);
+        entry = ptes[i];
         if (!(entry & PTE_P))
             continue;
         pt = find_free_page();
         r = sys_alloc_pt(pid, pd, i, pt, entry & PTE_PERM_MASK);
         assert(r == 0, "sys_alloc_pt");
-        dup_pt(pid, pt, (n + i) * PTRS_PER_PD);
+        dup_pt(pid, pt, PTE_ADDR(entry), va|(i<<PD_SHIFT));
     }
 }
 
-static void dup_pdpt(pid_t pid, pn_t pdpt, size_t n)
+static void dup_pdpt(pid_t pid, pn_t pdpt, uintptr_t addr, uintptr_t va)
 {
     size_t i;
     int r;
@@ -83,21 +89,21 @@ static void dup_pdpt(pid_t pid, pn_t pdpt, size_t n)
     for (i = 0; i < PTRS_PER_PDPT; ++i) {
         pte_t entry;
         pn_t pd;
+        pte_t* ptes = addr;
 
-        /// entry = uvpdpt[n + i];
-        while(1);
+        entry = ptes[i];
         if (!(entry & PTE_P))
             continue;
         pd = find_free_page();
         r = sys_alloc_pd(pid, pdpt, i, pd, entry & PTE_PERM_MASK);
         assert(r == 0, "sys_alloc_pd");
-        dup_pd(pid, pd, (n + i) * PTRS_PER_PDPT);
+        dup_pd(pid, pd, PTE_ADDR(entry), va|(i<<PDPT_SHIFT));
     }
 }
 
 static void dup_pml4(pid_t pid, pn_t pml4)
 {
-    register_t cr3 = rcr3();
+    uintptr_t cr3 = cr3_value;
     size_t i;
     int r;
 
@@ -105,21 +111,20 @@ static void dup_pml4(pid_t pid, pn_t pml4)
     for (i = 0; i < PTRS_PER_PML4; ++i) {
         pte_t entry, perm;
         pn_t pn, pdpt;
+        pte_t* ptes = cr3;
 
-        /// entry = uvpml4[i];
-        while(1);
+        entry = ptes[i];
         if (!(entry & PTE_P))
             continue;
 
         perm = entry & PTE_PERM_MASK;
         /* uvpt */
-        if (PTE_ADDR(entry) == cr3) {
-            /// assert(i == UVPML4_INDEX, "must be the uvpml4 index");
-            while(1);
-            r = sys_map_pml4(pid, i, perm);
-            assert(r == 0, "sys_map_pml4");
-            continue;
-        }
+//        if (PTE_ADDR(entry) == cr3) {
+//            /// assert(i == UVPML4_INDEX, "must be the uvpml4 index");
+//            r = sys_map_pml4(pid, i, perm);
+//            assert(r == 0, "sys_map_pml4");
+//            continue;
+//        }
 
         /* pdpt */
         pn = phys_to_pn(PTE_ADDR(entry));
@@ -127,7 +132,7 @@ static void dup_pml4(pid_t pid, pn_t pml4)
         pdpt = find_free_page();
         r = sys_alloc_pdpt(pid, pml4, i, pdpt, perm);
         assert(r == 0, "sys_alloc_pdpt");
-        dup_pdpt(pid, pdpt, i * PTRS_PER_PML4);
+        dup_pdpt(pid, pdpt, PTE_ADDR(entry), i<<PML4_SHIFT);
     }
 }
 
@@ -142,12 +147,14 @@ pid_t fork(void)
     pid = find_free_pid();
     find_free_pages(3, &pml4, &stack, &hvm);
     r = sys_clone(pid, pml4, stack, hvm);
-    assert(r == 0, "sys_clone");
+    assert(r >= 0, "sys_clone");
 
     /*
      * The child process will start here as we ensure sys_clone is inlined.
      */
-    if (getpid() == pid) {
+    //if (getpid() == pid) {
+    if (r > 0) {
+    	cr3_value = get_page(pml4);
         struct proc *proc = &uprocs[ucurrent->ppid];
 
         sys_set_proc_name(proc->name[0], proc->name[1]);

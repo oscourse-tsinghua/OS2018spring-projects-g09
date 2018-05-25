@@ -6,6 +6,7 @@
 #include <xapic.h>
 #include <syscall.h>
 #include <libs/riscv.h>
+#include "proc.h"
 
 void print_trapframe(struct trap_frame *tf);
 void print_regs(struct push_regs* gpr);
@@ -152,7 +153,7 @@ void exception_handler(struct trap_frame *tf) {
             libs_cprintf("Store/AMO access fault\n");
             break;
         case CAUSE_USER_ECALL:
-            //libs_cprintf("Environment call from U-mode\n");
+            // libs_cprintf("Environment call from U-mode\n");
             tf->epc += 4;
             ret = syscall(tf);
             break;
@@ -223,8 +224,14 @@ static inline void trap_dispatch(struct trap_frame* tf) {
 
 void trap(struct trap_frame *tf)
 {
-	// libs_cprintf("trap in kernel: case = 0x%llx badvaddr = 0x%llx\n", tf->cause, tf->badvaddr);
+	// libs_cprintf("trap to kernel: case = 0x%llx trap no = %d badvaddr = 0x%llx\n", tf->cause, tf->gpr.a7, tf->badvaddr);
+
+	struct trap_frame *otf = ((hvm_t*)get_page(get_proc(current)->hvm))->tf;
+	((hvm_t*)get_page(get_proc(current)->hvm))->tf = tf;
+
 	trap_dispatch(tf);
+
+	((hvm_t*)get_page(get_proc(current)->hvm))->tf = otf;
 }
 
 /* trap_in_kernel - test if trap happened in kernel */

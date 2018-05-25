@@ -32,11 +32,8 @@
 .endm
 #endif
 
-spin:
-	j spin
-
 .macro	SYS_WRAP	proc
-	j spin
+	j \proc
 .endm
 
 .global	sys_clone
