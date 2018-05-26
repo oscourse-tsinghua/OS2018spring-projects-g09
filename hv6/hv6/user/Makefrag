@@ -5,7 +5,8 @@ HV6_INIT_SRCS :=               \
 HV6_INIT_OBJS := $(addprefix $(O)/,$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(HV6_INIT_SRCS))))
 
 HV6_UPROGS :=                       \
-        $(O)/hv6/user/uprogs/hello         \
+        $(O)/hv6/user/uprogs/hello   \
+	$(O)/hv6/user/uprogs/calc   \
 
 HV6_UPROGS_OBJS := $(addsuffix .o,$(HV6_UPROGS))
 

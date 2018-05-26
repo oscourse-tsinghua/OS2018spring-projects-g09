@@ -19,7 +19,7 @@ int exec_in_mem(void* data)
     // clear_lower_pml4();
 
     /* read the first data block for the elf header */
-    cprintf("exec_in_mem: data = 0x%llx\n", data);
+    //cprintf("exec_in_mem: data = 0x%llx\n", data);
     ehdr = data;
     /* too restrictive (>= 4K) but works for now */
     if (!IS_ELF(*ehdr)) {
@@ -29,7 +29,7 @@ int exec_in_mem(void* data)
     phnum = ehdr->e_phnum;
     entry = ehdr->e_entry;
 
-    cprintf("exec_in_mem: entry = 0x%llx phnum = %d\n", entry, phnum);
+    //cprintf("exec_in_mem: entry = 0x%llx phnum = %d\n", entry, phnum);
 
     /* assume all program headers fit in one page for simplicity */
     assert(ehdr->e_phoff + sizeof(struct elf64_phdr) * phnum <= PAGE_SIZE,
@@ -103,7 +103,7 @@ int exec_in_mem(void* data)
     //              :
     //              : "i"(USTACK_TOP - PAGE_SIZE), "r"(entry), "d"(0)
     //              : "memory", "cc");
-    cprintf("entry = 0x%llx\n", entry);
+    //cprintf("entry = 0x%llx\n", entry);
 	asm volatile("li sp, %0; move a0, %1;jr a0;"
 				  :
 				  : "i"(USTACK_TOP - PAGE_SIZE), "r"(entry));

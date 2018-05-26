@@ -1646,7 +1646,7 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
     timeout = s->insn_counter + n_cycles;
 
     // FIXME
-	fprintf(stderr, "s->insn_counter = %lld s->pc = 0x%llx\n", s->insn_counter, s->pc);
+	// fprintf(stderr, "s->insn_counter = %lld s->pc = 0x%llx\n", s->insn_counter, s->pc);
 	if (s->power_down_flag) {
 		fprintf(stderr, "riscvemu exit because of power down\n");
         dump_regs(s);
@@ -1676,7 +1676,7 @@ void riscv_cpu_interp(RISCVCPUState *s, int n_cycles)
 		exit(1);
 	}
 
-	if (s->insn_counter > 200000000) {
+	if (s->insn_counter > 400000000) {
 		fprintf(stderr, "riscvemu exit because of s->insn_counter = %d is too large\n", s->insn_counter);
         dump_regs(s);
 		exit(1);

@@ -1,7 +1,5 @@
 #include "user.h"
 
-extern char* _uprogs_hello_start[];
-
 void line(char *buf, size_t n) {
 	char ch;
 	size_t off = 0;
@@ -16,14 +14,38 @@ void line(char *buf, size_t n) {
 	return;
 }
 
+void run_proc(void* data) {
+	pid_t pid = fork();
+	if (pid == 0) {
+		exec_in_mem(data);
+	}
+	yield();
+}
+
 int main() {
+	char buf[1024];
 	pid_t pid = getpid();
 	cprintf("Hello World pid = %d\n", pid);
 
-////	cprintf("Input Line:");
-////	line(buf, sizeof(buf));
-////	cprintf("Your Input:%s\n", buf);
-//
+	while(true) {
+		cprintf("Input Your Command:");
+		line(buf, sizeof(buf));
+
+		if (strcmp(buf, "ls") == 0) {
+			cprintf("hello calc\n");
+		} else if (strcmp(buf, "hello") == 0) {
+			extern char* _uprogs_hello_start[];
+			run_proc(_uprogs_hello_start);
+		} else if (strcmp(buf, "calc") == 0) {
+			extern char* _uprogs_calc_start[];
+			run_proc(_uprogs_calc_start);
+		} else {
+			cprintf("unknow command:[%s]\n", buf);
+		}
+
+		cprintf("\n");
+	}
+
 	pid = fork();
 	cprintf("fork pid = %d\n", pid);
 	if (pid == 0) {
@@ -32,14 +54,6 @@ int main() {
 
 	yield();
 	cprintf("after yield getpid() = %d\n", getpid());
-
-	pid = fork();
-	if (pid == 0) {
-		cprintf("Info: running hello uprog\n");
-		exec_in_mem(_uprogs_hello_start);
-		cprintf("Error: this code should not reach\n");
-	}
-	yield();
 
 	cprintf("Info: init process exit.\n");
     while(1);
