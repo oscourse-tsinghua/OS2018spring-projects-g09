@@ -75,13 +75,13 @@ cd riscvemu-2017-08-06
 
 2. 将CFLAGS=-O2 -Wall -g -Werror -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -MMD中的-Werror去掉
 
-编译运行;
+编译运行:
 
 ```sh
 make
 [sudo make install]
 ./riscvemu https://bellard.org/jslinux/buildroot-riscv64.cfg
-```sh
+```
 
 # 编译&运行
 
