@@ -3,6 +3,8 @@ http://os.cs.tsinghua.edu.cn/oscourse/OS2018spring/projects/g09
 
 * riscv-pk fd2ddce557a9085ccdba1a455eded4808e7466c6
 
+**实验平台为ubuntu 17.10**
+
 # RISC-V 64 工具链搭建
 
 先设置环境变量，推荐将以下代码写入文件vars.sh，之后每次启动shell直接指向source vars.sh就可以载入环境变量：
@@ -80,3 +82,20 @@ make
 [sudo make install]
 ./riscvemu https://bellard.org/jslinux/buildroot-riscv64.cfg
 ```sh
+
+# 编译&运行
+
+注：上面“RISCVEMU安装”不是必须的，但是由于编译运行需要一些依赖，所以最好将“RISCVEMU安装”一节中的内容完整执行一遍。
+
+```sh
+git clone https://github.com/oscourse-tsinghua/OS2018spring-projects-g09.git
+cd OS2018spring-projects-g09
+git submodule update --init --recursive
+```
+
+```sh
+export RISCV=path/to/riscv_toolchain
+export PATH=$RISCV/bin:$PATH
+cd hv6
+./run.sh
+```
