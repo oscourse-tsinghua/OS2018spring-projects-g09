@@ -1,12 +1,12 @@
 -include config.mk
 
 PROJECT      ?= hv6
-ARCH         ?= riscv64
+ARCH         ?= x86_64
 O            ?= o.$(ARCH)
 NR_CPUS      ?= 1
 QEMU_ACCEL   ?= kvm:tcg
-QEMU_CPU     ?= any
-QEMU_DISPLAY ?= none 
+QEMU_CPU     ?= max
+QEMU_DISPLAY ?= none
 # some Ubuntu doesn't have e1000e
 QEMU_NIC     ?= e1000
 BOCHS_CPU    ?= broadwell_ult
@@ -32,13 +32,12 @@ QUIET_CXX     = $(Q:@=@echo    '     C++      '$@;)
 QUIET_AR      = $(Q:@=@echo    '     AR       '$@;)
 QUIET_RANLIB  = $(Q:@=@echo    '     RANLIB   '$@;)
 
-#CFLAGS       += -fno-PIE
-#CFLAGS       += -ffreestanding -MD -MP
+CFLAGS       += -fno-PIE
+CFLAGS       += -ffreestanding -MD -MP
 CFLAGS       += -Wall
 CFLAGS       += -g
-CFLAGS		 += -mcmodel=medany
-#CFLAGS       += -mno-red-zone
-#CFLAGS       += -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx
+CFLAGS       += -mno-red-zone
+CFLAGS       += -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx
 CFLAGS       += -DCOMMIT_HASH=$(shell git rev-parse --short --verify HEAD)
 CFLAGS       += -DCOMMIT_BRANCH=$(shell git rev-parse --abbrev-ref --verify HEAD)
 CFLAGS       += -imacros kernel/config.h

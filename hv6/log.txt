@@ -1,0 +1,10 @@
+
+50 / 54
+
+extintr 不属于系统调用
+
+sys_debug_exit
+sys_debug_print_console
+sys_debug_print_screen
+sys_debug_dmesg
+sys_debug_sysctl

@@ -118,24 +118,23 @@ def alloc_page_table(old, pid, frm, index, to, perm, from_type, to_type):
 
 
 def sys_alloc_pdpt(old, pid, frm, index, to, perm):
-    return alloc_page_table(old, pid, frm, index, to, perm,
+    return alloc_page_table(old, pid, frm, index, to, perm & (dt.MAX_INT64 ^ dt.PTE_XWR_MASK),
                             dt.page_type.PAGE_TYPE_X86_PML4, dt.page_type.PAGE_TYPE_X86_PDPT)
 
 
 def sys_alloc_pd(old, pid, frm, index, to, perm):
-    return alloc_page_table(old, pid, frm, index, to, perm,
+    return alloc_page_table(old, pid, frm, index, to, perm & (dt.MAX_INT64 ^ dt.PTE_XWR_MASK),
                             dt.page_type.PAGE_TYPE_X86_PDPT, dt.page_type.PAGE_TYPE_X86_PD)
 
 
 def sys_alloc_pt(old, pid, frm, index, to, perm):
-    return alloc_page_table(old, pid, frm, index, to, perm,
+    return alloc_page_table(old, pid, frm, index, to, perm & (dt.MAX_INT64 ^ dt.PTE_XWR_MASK),
                             dt.page_type.PAGE_TYPE_X86_PD, dt.page_type.PAGE_TYPE_X86_PT)
 
 
 def sys_alloc_frame(old, pid, frm, index, to, perm):
     return alloc_page_table(old, pid, frm, index, to, perm,
                             dt.page_type.PAGE_TYPE_X86_PT, dt.page_type.PAGE_TYPE_FRAME)
-
 
 def sys_copy_frame(old, frm, pid, to):
     cond = z3.And(
@@ -188,7 +187,7 @@ def sys_protect_frame(old, pt, index, frame, perm):
         z3.Extract(63, 40, z3.UDiv(old.pages_ptr_to_int,
                                    util.i64(dt.PAGE_SIZE)) + frame) == z3.BitVecVal(0, 24),
         z3.Extract(39, 0, z3.UDiv(old.pages_ptr_to_int, util.i64(
-            dt.PAGE_SIZE)) + frame) == z3.Extract(51, 12, old.pages[pt].data(index)),
+            dt.PAGE_SIZE)) + frame) == z3.Extract(49, 10, old.pages[pt].data(index)),
 
         # no unsafe bits in perm is set
         perm & (dt.MAX_INT64 ^ dt.PTE_PERM_MASK) == 0,
@@ -563,6 +562,48 @@ def sys_map_file(old, pid, frm, index, n, perm):
 
     return cond, util.If(cond, new, old)
 
+def sys_map_page(old, pid, frm, index, pa, perm, from_type):
+    pfn = z3.UDiv(pa, util.i64(dt.PAGE_SIZE))
+    n = pfn - z3.UDiv(old.page_desc_table_ptr_to_int, util.i64(dt.PAGE_SIZE))
+
+    cond = z3.And(
+        is_pid_valid(pid),
+
+        # the pid is either current or an embryo belonging to current
+        z3.Or(pid == old.current,
+              z3.And(
+                  old.procs[pid].ppid == old.current,
+                  old.procs[pid].state == dt.proc_state.PROC_EMBRYO)),
+
+        # frm is a valid pn of type PT whose owner is pid
+        is_pn_valid(frm),
+        old.pages[frm].type == from_type,
+        old.pages[frm].owner == pid,
+
+        # Index is a valid page index
+        z3.ULT(index, 512),
+
+        # perm has no unsafe bits on it and it is present and non-writable
+        perm & (dt.MAX_INT64 ^ dt.PTE_PERM_MASK) == 0,
+        perm & dt.PTE_P != 0,
+
+        # index does not have the P bit in the from page
+        old.pages[frm].data(index) & dt.PTE_P == 0,
+    )
+
+    new = old.copy()
+
+    new.pages[frm].data[index] = ((z3.UDiv(
+        new.page_desc_table_ptr_to_int, util.i64(dt.PAGE_SIZE)) + n) << dt.PTE_PFN_SHIFT) | perm
+
+    # maintain the "shadow" pgtable
+    new.pages[frm].pgtable_pn[index] = n
+    new.pages[frm].pgtable_perm[index] = perm
+    new.pages[frm].pgtable_type[index] = dt.PGTYPE_PAGE_DESC
+
+    new.flush_tlb(pid)
+
+    return cond, util.If(cond, new, old)
 
 def free_page_table_page(old, frm, index, to, from_type, to_type):
     cond = z3.And(
@@ -586,7 +627,7 @@ def free_page_table_page(old, frm, index, to, from_type, to_type):
         z3.Extract(63, 40, z3.UDiv(old.pages_ptr_to_int,
                                    util.i64(dt.PAGE_SIZE)) + to) == z3.BitVecVal(0, 24),
         z3.Extract(39, 0, z3.UDiv(old.pages_ptr_to_int, util.i64(
-            dt.PAGE_SIZE)) + to) == z3.Extract(51, 12, old.pages[frm].data(index)),
+            dt.PAGE_SIZE)) + to) == z3.Extract(49, 10, old.pages[frm].data(index)),
     )
 
     new = old.copy()

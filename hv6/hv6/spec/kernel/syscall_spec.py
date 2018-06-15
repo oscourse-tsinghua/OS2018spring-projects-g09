@@ -80,6 +80,15 @@ class SyscallSpec(object):
 
     def sys_map_file(self):
         return _sys_map()
+    
+    def sys_map_page(self):
+        pid = util.FreshBitVec('pid', dt.pid_t)
+        frm = util.FreshBitVec('from', dt.pn_t)
+        index = util.FreshBitVec('index', dt.size_t)
+        pa = util.FreshBitVec('pa', dt.size_t)
+        perm = util.FreshBitVec('perm', dt.pte_t)
+        from_type = util.FreshBitVec('from_type', dt.uint64_t)
+        return (pid, frm, index, pa, perm, from_type)
 
     def sys_map_inode(self):
         return _sys_map()

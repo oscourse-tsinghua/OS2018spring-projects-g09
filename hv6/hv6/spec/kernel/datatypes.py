@@ -127,29 +127,45 @@ def FreshVA():
 def BIT64(bit): return z3.BitVecVal(1 << bit, 64)
 def has_bit(v, bit): return (v & bit) != 0
 
+###
+# PTE_P = BIT64(0)                            # present
+# PTE_W = BIT64(1)                            # writable
+# PTE_U = BIT64(2)                            # user
+# PTE_PWT = BIT64(3)                          # write through
+# PTE_PCD = BIT64(4)                          # cache disable
+# PTE_A = BIT64(5)                            # accessed
+# PTE_D = BIT64(6)                            # dirty
+# PTE_PS = BIT64(7)                           # page size
+# PTE_G = BIT64(8)                            # global
+# PTE_AVL = BIT64(9) | BIT64(10) | BIT64(11)  # available for software use
+# PTE_NX = BIT64(63)                          # execute disable
+# PTE_PERM_MASK = PTE_P | PTE_W | PTE_U | PTE_PWT | PTE_PCD | PTE_AVL | PTE_NX
 
 PTE_P = BIT64(0)                            # present
-PTE_W = BIT64(1)                            # writable
-PTE_U = BIT64(2)                            # user
-PTE_PWT = BIT64(3)                          # write through
-PTE_PCD = BIT64(4)                          # cache disable
-PTE_A = BIT64(5)                            # accessed
-PTE_D = BIT64(6)                            # dirty
-PTE_PS = BIT64(7)                           # page size
-PTE_G = BIT64(8)                            # global
-PTE_AVL = BIT64(9) | BIT64(10) | BIT64(11)  # available for software use
-PTE_NX = BIT64(63)                          # execute disable
-PTE_PERM_MASK = PTE_P | PTE_W | PTE_U | PTE_PWT | PTE_PCD | PTE_AVL | PTE_NX
+PTE_R = BIT64(1)
+PTE_W = BIT64(2)                            # writable
+PTE_U = BIT64(4)                            # user
+# PTE_PWT = BIT64(3)                          # write through
+# PTE_PCD = BIT64(4)                          # cache disable
+# PTE_A = BIT64(5)                            # accessed
+# PTE_D = BIT64(6)                            # dirty
+# PTE_PS = BIT64(7)                           # page size
+# PTE_G = BIT64(8)                            # global
+# PTE_AVL = BIT64(9) | BIT64(10) | BIT64(11)  # available for software use
+PTE_X = BIT64(3)                          # execute disable
+PTE_PERM_MASK = PTE_P | PTE_W | PTE_U | PTE_X | PTE_R
+PTE_XWR_MASK = PTE_W | PTE_X | PTE_R
 
 DMAR_PTE_R = BIT64(0)     # Read
-DMAR_PTE_W = BIT64(1)     # Write
-DMAR_PTE_SNP = BIT64(11)  # Snoop Behaviour
-DMAR_PTE_TM = BIT64(62)   # Transient Mapping
+### DMAR_PTE_W = BIT64(1)     # Write
+DMAR_PTE_W = BIT64(2)     # Write
+#DMAR_PTE_SNP = BIT64(11)  # Snoop Behaviour
+#DMAR_PTE_TM = BIT64(62)   # Transient Mapping
 
 
-DMAR_PTE_ADDR_SHIFT = z3.BitVecVal(12, uint64_t)
-PTE_PFN_SHIFT = z3.BitVecVal(12, uint64_t)
-
+#DMAR_PTE_ADDR_SHIFT = z3.BitVecVal(12, uint64_t)
+### PTE_PFN_SHIFT = z3.BitVecVal(12, uint64_t)
+PTE_PFN_SHIFT = z3.BitVecVal(10, uint64_t)
 
 PGTYPE_PAGE = z3.BitVecVal(0, uint64_t)
 PGTYPE_PROC = z3.BitVecVal(1, uint64_t)

@@ -1,0 +1,51 @@
+sys_map_pml4 0 -> PTE
+sys_map_page_desc 0 -> PTE
+sys_map_proc 0 -> PTE
+sys_map_dev 0 -> PTE
+sys_map_file 0 -> PTE
+sys_alloc_pdpt 512
+sys_alloc_pd 512
+sys_alloc_pt 512
+sys_alloc_frame 0 -> PTE
+sys_copy_frame 0
+sys_protect_frame 0 -> spec&mmu mask
+sys_free_pdpt 0 -> spec&mmu mask
+sys_free_pd 0 -> spec&mmu mask
+sys_free_pt 0 -> spec&mmu mask
+sys_free_frame 0 -> spec&mmu mask
+sys_reclaim_page 0
+clone_proc 0 -> libs_cprintf
+sys_set_proc_name 0 -> libs_cprintf
+sys_set_runnable 0
+switch_proc 0 -> hvm_switch
+sys_kill 0
+sys_reap 0
+sys_reparent 0
+send_proc 0
+recv_proc 0
+reply_wait_proc 0 -> libs_cprintf
+call_proc 0 -> libs_cprintf
+sys_create 0 -> libs_cprintf
+sys_close 0 -> libs_cprintf
+sys_dup 0 -> libs_cprintf
+sys_dup2 0 -> libs_cprintf
+sys_lseek 0 -> libs_cprintf
+sys_map_pcipage 0 -> PTE
+sys_alloc_iommu_root 0 -> libs_cprintf
+sys_alloc_iommu_pdpt 512
+sys_alloc_iommu_pd 512
+sys_alloc_iommu_pt 512
+sys_alloc_iommu_frame 512
+sys_map_iommu_frame 0 -> PTE
+sys_reclaim_iommu_frame 0
+sys_reclaim_iommu_root 0
+sys_alloc_vector 0 -> libs_cprintf
+sys_reclaim_vector 0
+sys_alloc_intremap 0 -> libs_cprintf
+sys_reclaim_intremap 0
+sys_ack_intr 0 -> libs_cprintf
+sys_alloc_io_bitmap 0 -> libs_cprintf
+sys_alloc_port 0 -> libs_cprintf
+sys_reclaim_port 0
+extintr 0
+43 / 50

@@ -1,0 +1,124 @@
+     PY2      hv6-verify
+Using z3 v4.6.3.0
+Could not prove, trying to find a minimal ce
+Could not prove, trying to find a minimal ce
+Can not minimize condition further
+Precondition
+True
+does not imply
+And(ULT(to.1, 512),
+    dmapages_type.27(to.1) == 0,
+    ULT(from.1, 8192),
+    pages_type.27(from.1) == 11,
+    pages_owner.27(from.1) == current.13,
+    ULT(index.20, 512),
+    perm.1 & (18446744073709551615 ^ (1 | 2)) == 0,
+    pages_data.27(from.1, index.20) == 0) ==
+(If(Not(ULE(512, to.1)),
+    If(@dmapage_desc_table->struct.page_desc::type.13(0,
+                                        to.1) ==
+       0,
+       If(Not(ULE(8192, from.1)),
+          If(@page_desc_table->struct.page_desc::type.13(0,
+                                        from.1) ==
+             11,
+             If(@page_desc_table->struct.page_desc::pid.13(0,
+                                        from.1) ==
+                @current.13(0),
+                If(And(Not(ULE(512, index.20)),
+                       And(Extract(1, 1, perm.1) == 0,
+                           Extract(63, 3, perm.1) == 0)),
+                   If(@pages.13(0, from.1, index.20) == 0,
+                      0,
+                      4294967274),
+                   4294967274),
+                4294967283),
+             4294967274),
+          4294967274),
+       4294967280),
+    4294967274) ==
+ 0)
+Could not prove, trying to find a minimal ce
+Could not prove, trying to find a minimal ce
+Can not minimize condition further
+Precondition
+True
+does not imply
+And(ULT(to.2, 8192),
+    pages_type.29(to.2) == 0,
+    ULT(from.2, 8192),
+    pages_type.29(from.2) == 9,
+    pages_owner.29(from.2) == current.14,
+    ULT(index.23, 512),
+    perm.2 & (18446744073709551615 ^ (1 | 2)) == 0,
+    pages_data.29(from.2, index.23) == 0) ==
+(If(Not(ULE(8192, to.2)),
+    If(@page_desc_table->struct.page_desc::type.14(0, to.2) ==
+       0,
+       If(Not(ULE(8192, from.2)),
+          If(@page_desc_table->struct.page_desc::type.14(0,
+                                        from.2) ==
+             9,
+             If(@page_desc_table->struct.page_desc::pid.14(0,
+                                        from.2) ==
+                @current.14(0),
+                If(And(Not(ULE(512, index.23)),
+                       And(Extract(1, 1, perm.2) == 0,
+                           Extract(63, 3, perm.2) == 0)),
+                   If(@pages.14(0, from.2, index.23) == 0,
+                      0,
+                      4294967274),
+                   4294967274),
+                4294967283),
+             4294967274),
+          4294967274),
+       4294967274),
+    4294967274) ==
+ 0)
+Could not prove, trying to find a minimal ce
+Could not prove, trying to find a minimal ce
+Can not minimize condition further
+Precondition
+True
+does not imply
+And(ULT(to.3, 8192),
+    pages_type.31(to.3) == 0,
+    ULT(from.3, 8192),
+    pages_type.31(from.3) == 8,
+    pages_owner.31(from.3) == current.15,
+    ULT(index.26, 512),
+    perm.3 & (18446744073709551615 ^ (1 | 2)) == 0,
+    pages_data.31(from.3, index.26) == 0) ==
+(If(Not(ULE(8192, to.3)),
+    If(@page_desc_table->struct.page_desc::type.15(0, to.3) ==
+       0,
+       If(Not(ULE(8192, from.3)),
+          If(@page_desc_table->struct.page_desc::type.15(0,
+                                        from.3) ==
+             8,
+             If(@page_desc_table->struct.page_desc::pid.15(0,
+                                        from.3) ==
+                @current.15(0),
+                If(And(Not(ULE(512, index.26)),
+                       And(Extract(1, 1, perm.3) == 0,
+                           Extract(63, 3, perm.3) == 0)),
+                   If(@pages.15(0, from.3, index.26) == 0,
+                      0,
+                      4294967274),
+                   4294967274),
+                4294967283),
+             4294967274),
+          4294967274),
+       4294967274),
+    4294967274) ==
+ 0)
+Could not prove, trying to find a minimal ce
+Could not prove, trying to find a minimal ce
+Can not minimize condition further
+Precondition
+True
+does not imply
+And(ULT(to.4, 8192),
+    pages_type.33(to.4) == 0,
+    ULT(from.4, 8192),
+    p

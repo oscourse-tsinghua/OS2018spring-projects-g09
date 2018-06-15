@@ -92,6 +92,7 @@ _syscalls = [
     "sys_alloc_port",
     "sys_reclaim_port",
     "extintr",
+    "sys_map_page"
 ]
 
 
@@ -330,11 +331,17 @@ def hvm_invalidate_tlb(ctx, pid):
     ctx.globals['#tlbinv'] = util.partial_update(uf, (pid,), z3.BoolVal(True))
 hvm_invalidate_tlb.read = lambda *args: hvm_invalidate_tlb
 
-
+###
+# def hvm_switch(ctx, *args, **kwargs):
+#     raise util.NoReturn()
 def hvm_switch(ctx, *args, **kwargs):
-    raise util.NoReturn()
+    pass
 hvm_switch.read = lambda *args: hvm_switch
 
+### after
+def libs_cprintf(ctx, *args, **kwargs):
+    pass
+libs_cprintf.read = lambda *args: libs_cprintf
 
 def iommu_set_dev_root(ctx, devid, addr):
     pass
@@ -479,6 +486,9 @@ def newctx():
     ctx.globals['@pdb'] = pdb
     ctx.globals['@syslog'] = syslog
 
+    ### after
+    ctx.globals['@libs_cprintf'] = libs_cprintf
+
     # iommu fns
     ctx.globals['@iommu_set_dev_root'] = iommu_set_dev_root
     ctx.globals['@iommu_get_dev_root'] = iommu_get_dev_root
@@ -504,7 +514,6 @@ def newctx():
 
 class HV6(HV6Base):
     def setUp(self):
-	print('HV6setUp')
         self.ctx = newctx()
         self.state = dt.KernelState()
 
@@ -514,15 +523,12 @@ class HV6(HV6Base):
         self._pre_state = spec.state_equiv(self.ctx, self.state)
         self.ctx.add_assumption(spec.impl_invariants(self.ctx))
         self.solver.add(self._pre_state)
-	print('HV6setUp_')
 
     def tearDown(self):
-	print('HV6tearDown\n')
         if isinstance(self.solver, solver.Solver):
             del self.solver
 
     def test_preempt(self):
-	print('test_preempt')
         with self.assertRaises(util.NoReturn):
             self.ctx.call('@preempt')
         pid = util.FreshBitVec('pid', dt.pid_t)
@@ -530,7 +536,6 @@ class HV6(HV6Base):
         self._prove(z3.Exists([pid], spec.state_equiv(self.ctx, newstate)))
 
     def test_fault(self):
-	print('test_fault')
         with self.assertRaises(util.NoReturn):
             self.ctx.call('@fault')
         pid = util.FreshBitVec('pid', dt.pid_t)
@@ -540,7 +545,6 @@ class HV6(HV6Base):
         self._prove(z3.Exists([pid], spec.state_equiv(self.ctx, newstate)))
 
     def _syscall_generic(self, name):
-	print('_syscall_generic',name)
         args = syscall_spec.get_syscall_args(name)
         res = self.ctx.call('@' + name, *args)
         cond, newstate = getattr(spec, name)(self.state, *args)
@@ -551,7 +555,6 @@ class HV6(HV6Base):
         if INTERACTIVE and model:
             from ipdb import set_trace
             set_trace()
-	print('_syscall_generic_')
 
     syscalls_generic = _syscalls
 
